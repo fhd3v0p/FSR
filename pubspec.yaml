@@ -1,0 +1,43 @@
+name: myapp1
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  slide_to_act: any
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/avatar1.png
+    - assets/avatar2.png
+    - assets/avatar3.png
+    - assets/avatar4.png
+    - assets/avatar5.png
+    - assets/avatar6.png
+    - assets/center_memoji.png
+    - assets/m1.png
+    - assets/m2.png
+    - assets/m3.png
+    - assets/m4.png
+    - assets/m5.png
+    - assets/m6.png
+    - assets/work1.png
+    - assets/work2.png
+  fonts:
+    - family: Lepka
+      fonts:
+        - asset: assets/fonts/Lepka.otf
+          weight: 400
+          style: normal
