@@ -27,6 +27,7 @@ flutter:
     - assets/avatar5.png
     - assets/avatar6.png
     - assets/center_memoji.png
+    - assets/giveaway_banner.png
     - assets/m1.png
     - assets/m2.png
     - assets/m3.png
@@ -40,4 +41,8 @@ flutter:
       fonts:
         - asset: assets/fonts/Lepka.otf
           weight: 400
-          style: normal
+    - family: SFProDisplay
+      fonts:
+        - asset: assets/fonts/SF-Pro-Display-Regular.otf
+        - asset: assets/fonts/SF-Pro-Display-Bold.otf
+          weight: 700

@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:slide_to_act/slide_to_act.dart';
-import 'role_selection_screen.dart';
+import 'giveaway_screen.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -44,11 +44,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   }
 
   void _startOrbitAnimation() {
-    const double baseSpeed = 0.009; // Базовая скорость
-    const double maxAdditionalSpeed = 0.01; // Максимальное увеличение скорости
-    const Duration frameDuration = Duration(milliseconds: 16); // ~60 FPS
+    const double baseSpeed = 0.009;
+    const double maxAdditionalSpeed = 0.01;
+    const Duration frameDuration = Duration(milliseconds: 16);
 
     void tick() {
+      if (!mounted) return; // <--- добавьте эту проверку!
       final double speed = baseSpeed + (_sliderProgress * maxAdditionalSpeed);
       _orbitAngle += speed;
       if (_orbitAngle > 2 * pi) {
@@ -171,7 +172,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  fontFamily: 'Lepka',
+                  fontFamily: 'Lepka', // Только тут Lepka!
                 ),
               ),
               const SizedBox(height: 12),
@@ -181,7 +182,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 style: TextStyle(
                   fontSize: 20,
                   color: Colors.white70,
-                  fontFamily: 'Lepka',
+                  // fontFamily: 'Lepka', // УБРАТЬ эту строку!
                 ),
               ),
               const SizedBox(height: 32),
@@ -198,7 +199,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   textStyle: const TextStyle(
                     color: Colors.white70,
                     fontSize: 20,
-                    fontFamily: 'Lepka',
+                    // fontFamily не указывать!
                   ),
                   outerColor: Colors.white.withOpacity(0.2),
                   innerColor: Colors.white.withOpacity(0.85),
@@ -209,13 +210,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   elevation: 0,
                   borderRadius: 50,
                   onSubmit: () {
-                    Navigator.of(context).push(PageRouteBuilder(
-                      transitionDuration: const Duration(milliseconds: 700),
-                      pageBuilder: (_, __, ___) => const RoleSelectionScreen(),
-                      transitionsBuilder: (_, animation, __, child) {
-                        return FadeTransition(opacity: animation, child: child);
-                      },
-                    ));
+                    Future.microtask(() {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (_) => const GiveawayScreen()),
+                      );
+                    });
+                    return null;
                   },
                 ),
               ),

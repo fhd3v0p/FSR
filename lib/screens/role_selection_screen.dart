@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'city_selection_screen.dart';
 import 'master_join_info_screen.dart';
+import 'giveaway_screen.dart'; // Добавьте импорт, если его нет
 
 class RoleSelectionScreen extends StatefulWidget {
   const RoleSelectionScreen({super.key});
@@ -82,6 +83,18 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
 
     return Scaffold(
       backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const GiveawayScreen()),
+            );
+          },
+        ),
+      ),
       body: Center(
         child: SizedBox(
           height: circleSize + overlap,
@@ -171,7 +184,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
-                        fontFamily: 'Lepka',
+                        fontFamily: 'SFProDisplay', // было Lepka, стало SFProDisplay
                       ),
                     ),
                   ),
@@ -197,7 +210,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
-                        fontFamily: 'Lepka',
+                        fontFamily: 'SFProDisplay', // было Lepka, стало SFProDisplay
                       ),
                     ),
                   ),
@@ -211,7 +224,7 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen>
                     color: Color(0xFF8E5BBE),
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
-                    fontFamily: 'Lepka',
+                    fontFamily: 'SFProDisplay', // было Lepka, стало SFProDisplay
                   ),
                 ),
               ),

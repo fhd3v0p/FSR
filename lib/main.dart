@@ -11,10 +11,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: 'Fresh Style Russia',
       debugShowCheckedModeBanner: false,
-      title: 'FSR App',
       theme: ThemeData(
-        fontFamily: 'Lepka',
+        fontFamily: 'SFProDisplay', // основной минималистичный шрифт
         scaffoldBackgroundColor: const Color(0xFFE3C8F1),
       ),
       home: const WelcomeScreen(),
