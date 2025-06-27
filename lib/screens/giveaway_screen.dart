@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'role_selection_screen.dart';
 import 'dart:async';
+import 'package:url_launcher/url_launcher.dart';
+
 
 class GiveawayScreen extends StatefulWidget {
   const GiveawayScreen({super.key});
@@ -114,7 +116,13 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                       title: 'Подписаться на Telegram-папку',
                       subtitle: '10 каналов одним кликом\n+1000 XP',
                       icon: Icons.folder_special,
-                      onTap: () {
+                      onTap: () async {
+                        // Открыть ссылку на Telegram-папку
+                        const url = 'https://t.me/addlist/IcPQxDiYrwU3Mjgy';
+                        if (await canLaunchUrl(Uri.parse(url))) {
+                          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                        }
+                        // Отметить задание выполненным
                         setState(() {
                           _task1Done = true;
                         });
