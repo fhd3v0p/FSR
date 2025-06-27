@@ -47,15 +47,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text(
-          'Гивевей',
-          style: TextStyle(
-            fontFamily: 'Lepka',
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-            color: Colors.white,
-          ),
-        ),
+        title: const SizedBox.shrink(), // убираем русское слово "Гивевей"
         centerTitle: true,
         elevation: 0,
       ),
@@ -74,20 +66,38 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
               color: Colors.black.withOpacity(0.5),
             ),
           ),
+          // Надпись GIVEAWAY между верхом и таймером
+          Positioned(
+            top: 24,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Text(
+                'GIVEAWAY',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Lepka',
+                  letterSpacing: 2,
+                ),
+              ),
+            ),
+          ),
           // Основной контент
           Column(
             children: [
-              const SizedBox(height: 24),
+              const SizedBox(height: 80), // увеличиваем отступ, чтобы таймер был ниже надписи
               // Таймер — крупный, адаптивный
               SizedBox(
-                height: 180, // можно увеличить до 140-160 для ещё большего размера
+                height: 180,
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
                     _formatDuration(_timeLeft),
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 160, // очень крупный, но FittedBox уменьшит если не влезет
+                      fontSize: 160,
                       fontWeight: FontWeight.w700,
                       letterSpacing: -2,
                     ),
