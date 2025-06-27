@@ -68,7 +68,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
           ),
           // Надпись GIVEAWAY между верхом и таймером
           Positioned(
-            top: 24,
+            top: 8,
             left: 0,
             right: 0,
             child: Center(
@@ -76,7 +76,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                 'GIVEAWAY',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 40,
+                  fontSize: 90,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Lepka',
                   letterSpacing: 2,
