@@ -38,7 +38,7 @@ class RoleSelectionScreen extends StatelessWidget {
           // Затемнение для читаемости
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.6),
+              color: Colors.black.withOpacity(0.1),
             ),
           ),
           // Контент

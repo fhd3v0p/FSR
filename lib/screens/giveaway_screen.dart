@@ -65,7 +65,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
           // Затемнение для читаемости текста (по желанию)
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withOpacity(0.15),
             ),
           ),
           // Надпись GIVEAWAY между верхом и таймером

@@ -38,7 +38,7 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> {
           // Затемнение
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.6),
+              
             ),
           ),
           // Контент
