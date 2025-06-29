@@ -12,8 +12,8 @@ class MasterCloudScreen extends StatefulWidget {
 }
 
 class _MasterCloudScreenState extends State<MasterCloudScreen> {
-  String selectedCategory = 'Тату';
-  final categories = ['Тату', 'Маник', 'Хэир', 'Ювелирка', 'Кастом'];
+  String selectedCategory = 'Tattoo';
+  final categories = ['Tattoo', 'Nails', 'Hair', 'Jewelry', 'Custom'];
 
   final ScrollController _scrollController = ScrollController();
   Timer? _autoScrollTimer;
@@ -61,91 +61,163 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final masters = MasterModel.sampleData
-        .where((m) => m.city == widget.city && m.category == selectedCategory)
-        .toList();
+    // Дублируем мастеров для теста (до 9 штук)
+    final masters = List.generate(
+      9,
+      (i) => MasterModel.sampleData[i % MasterModel.sampleData.length].copyWith(
+        name: '${MasterModel.sampleData[i % MasterModel.sampleData.length].name} ${i + 1}',
+        city: widget.city,
+        category: selectedCategory,
+      ),
+    );
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final avatarSize = (screenWidth - 24 * 2 - 40) / 3; // 24*2 padding, 40 — отступы между
 
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text(
-          'Мастера в ${widget.city}',
+          'Masters in ${widget.city}',
           style: const TextStyle(fontFamily: 'Lepka'),
         ),
         backgroundColor: Colors.black,
       ),
-      body: Column(
+      body: Stack(
         children: [
-          SizedBox(
-            height: 64,
-            child: ListView.builder(
-              controller: _scrollController,
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.all(12),
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                final cat = categories[index];
-                final isSelected = selectedCategory == cat;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() => selectedCategory = cat);
-                      _pauseAutoScroll();
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: isSelected ? Colors.white : Colors.transparent,
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(color: Colors.white),
-                      ),
-                      child: Text(
-                        cat,
-                        style: TextStyle(
-                          color: isSelected ? Colors.black : Colors.white,
-                          fontFamily: 'Lepka',
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
+          // Фон master_cloud_banner.png
+          Positioned.fill(
+            child: Image.asset(
+              'assets/master_cloud_banner.png',
+              fit: BoxFit.cover,
             ),
           ),
-          Expanded(
-            child: Wrap(
-              spacing: 20,
-              runSpacing: 20,
-              alignment: WrapAlignment.center,
-              children: masters.map((m) {
-                return GestureDetector(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => MasterDetailScreen(master: m),
+          Column(
+            children: [
+              SizedBox(
+                height: 72,
+                child: ListView.builder(
+                  controller: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  itemCount: categories.length,
+                  itemBuilder: (context, index) {
+                    final cat = categories[index];
+                    final isSelected = selectedCategory == cat;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() => selectedCategory = cat);
+                          _pauseAutoScroll();
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+                          decoration: BoxDecoration(
+                            color: isSelected ? Colors.white : Colors.transparent,
+                            borderRadius: BorderRadius.circular(30),
+                            border: Border.all(color: Colors.white),
+                          ),
+                          child: Text(
+                            cat,
+                            style: TextStyle(
+                              color: isSelected ? Colors.black : Colors.white,
+                              fontFamily: 'Lepka',
+                              fontSize: 18,
+                              height: 1.2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  child: GridView.builder(
+                    itemCount: masters.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      mainAxisSpacing: 20,
+                      crossAxisSpacing: 20,
+                      childAspectRatio: 0.8,
                     ),
+                    itemBuilder: (context, i) {
+                      final m = masters[i];
+                      return GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MasterDetailScreen(master: m),
+                          ),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 2),
+                              ),
+                              child: CircleAvatar(
+                                backgroundImage: AssetImage(m.avatar),
+                                radius: avatarSize / 2,
+                                backgroundColor: Colors.transparent,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              m.name,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Lepka',
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                    child: CircleAvatar(
-                      backgroundImage: AssetImage(m.avatar),
-                      radius: 40,
-                      backgroundColor: Colors.transparent,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+}
+
+// Добавьте этот extension для быстрого копирования MasterModel с изменением полей
+extension MasterModelCopy on MasterModel {
+  MasterModel copyWith({
+    String? name,
+    String? city,
+    String? category,
+    String? avatar,
+    String? telegram,
+    String? instagram,
+    String? tiktok,
+    List<String>? gallery,
+  }) {
+    return MasterModel(
+      name: name ?? this.name,
+      city: city ?? this.city,
+      category: category ?? this.category,
+      avatar: avatar ?? this.avatar,
+      telegram: telegram ?? this.telegram,
+      instagram: instagram ?? this.instagram,
+      tiktok: tiktok ?? this.tiktok,
+      gallery: gallery ?? this.gallery,
     );
   }
 }
