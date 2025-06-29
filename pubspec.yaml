@@ -28,6 +28,8 @@ flutter:
     - assets/avatar6.png
     - assets/center_memoji.png
     - assets/giveaway_banner.png
+    - assets/role_selection_banner.png
+    - assets/city_selection_banner.png
     - assets/main_banner.png
     - assets/m1.png
     - assets/m2.png

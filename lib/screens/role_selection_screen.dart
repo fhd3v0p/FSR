@@ -28,17 +28,17 @@ class RoleSelectionScreen extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // Новый баннер как фон
+          // Баннер на фоне
           Positioned.fill(
             child: Image.asset(
-              'assets/main_banner.png',
+              'assets/role_selection_banner.png',
               fit: BoxFit.cover,
             ),
           ),
-          // Затемнение для читаемости
+          // Затемнение для читаемости контента (по желанию)
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withOpacity(0.15),
             ),
           ),
           // Контент
