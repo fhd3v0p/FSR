@@ -108,7 +108,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             height: 224,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: const Color(0xFFDDAEF5).withOpacity(0.4),
+                              color: const Color(0xFFFF6EC7).withOpacity(0.4), // ярко-розовый
                             ),
                           ),
                         ),
@@ -119,7 +119,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             height: 120,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: const Color(0xFFDDAEF5).withOpacity(0.85),
+                              color: const Color(0xFFFF6EC7).withOpacity(0.85), // ярко-розовый, плотнее
                             ),
                           ),
                         ),
@@ -128,7 +128,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           height: 320,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: const Color(0xFFDDAEF5).withOpacity(0.2),
+                            color: const Color(0xFFFFB3E6).withOpacity(0.2), // просто розовый цвет без градиента
                           ),
                         ),
                         for (int i = 0; i < 3; i++)
@@ -150,13 +150,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         Container(
                           padding: const EdgeInsets.all(3),
                           decoration: const BoxDecoration(
-                            color: Colors.white,
+                            color: Colors.white, // белая рамка
                             shape: BoxShape.circle,
                           ),
                           child: const CircleAvatar(
                             radius: 36,
-                            backgroundImage:
-                                AssetImage('assets/center_memoji.png'),
+                            backgroundImage: AssetImage('assets/center_memoji.png'),
+                            backgroundColor: Color(0xFF33272D), // фон внутри мемодзи теперь #33272D
                           ),
                         ),
                       ],
@@ -169,20 +169,19 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 'Fresh Style Russia',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 36,
+                  fontSize: 54, // Было 36, стало в 1.5 раза больше
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  fontFamily: 'Lepka', // Только тут Lepka!
+                  fontFamily: 'Lepka',
                 ),
               ),
               const SizedBox(height: 12),
               const Text(
-                'Find Smarter,\nConnect Faster\nwith AI search!',
+                'Find smarter, connect faster with AI search!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 20,
                   color: Colors.white70,
-                  // fontFamily: 'Lepka', // УБРАТЬ эту строку!
                 ),
               ),
               const SizedBox(height: 32),
@@ -196,16 +195,15 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 },
                 child: SlideAction(
                   text: 'Проведите для начала',
-                  textStyle: const TextStyle(
-                    color: Colors.white70,
+                  textStyle: TextStyle(
+                    color: Colors.white.withOpacity(0.7), // светло-серая, светлее фона
                     fontSize: 20,
-                    // fontFamily не указывать!
                   ),
-                  outerColor: Colors.white.withOpacity(0.2),
-                  innerColor: Colors.white.withOpacity(0.85),
+                  outerColor: Colors.white70.withOpacity(0.35), // фон слайдера
+                  innerColor: Colors.white, // круг белый всегда
                   sliderButtonIcon: Icon(
                     Icons.arrow_forward,
-                    color: Colors.purple.shade800,
+                    color: Color(0xFFFF6EC7), // стрелочка розовая всегда
                   ),
                   elevation: 0,
                   borderRadius: 50,
@@ -236,6 +234,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       child: CircleAvatar(
         radius: 20,
         backgroundImage: AssetImage(path),
+        backgroundColor: Colors.black, // фон внутри аватаров теперь чёрный
       ),
     );
   }

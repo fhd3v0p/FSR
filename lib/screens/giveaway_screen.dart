@@ -13,20 +13,29 @@ class GiveawayScreen extends StatefulWidget {
 
 class _GiveawayScreenState extends State<GiveawayScreen> {
   late Timer _timer;
-  Duration _timeLeft = const Duration(days: 3, hours: 3, minutes: 47, seconds: 4);
+  Duration _timeLeft = Duration.zero;
 
   bool _task1Done = false;
   bool _task2Done = false;
 
+  final DateTime giveawayDate = DateTime(2025, 7, 10, 20, 0, 0); // 10 июля 2025, 20:00
+
   @override
   void initState() {
     super.initState();
+    _updateTimeLeft();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      setState(() {
-        if (_timeLeft.inSeconds > 0) {
-          _timeLeft -= const Duration(seconds: 1);
-        }
-      });
+      _updateTimeLeft();
+    });
+  }
+
+  void _updateTimeLeft() {
+    final now = DateTime.now();
+    setState(() {
+      _timeLeft = giveawayDate.difference(now);
+      if (_timeLeft.isNegative) {
+        _timeLeft = Duration.zero;
+      }
     });
   }
 
@@ -145,7 +154,8 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.all(16),
-                child: GestureDetector(
+                child: GradientButton(
+                  text: 'Перейти в приложение',
                   onTap: allTasksDone
                       ? () {
                           Navigator.of(context).pushReplacement(
@@ -155,43 +165,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                           );
                         }
                       : null,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: double.infinity,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(18),
-                      gradient: allTasksDone
-                          ? const LinearGradient(
-                              colors: [
-                                Color(0xFFDE3DF6),
-                                Color(0xFF3DD6F6),
-                              ],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            )
-                          : null,
-                      color: allTasksDone ? null : Colors.grey[800],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Перейти в приложение',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(allTasksDone ? 1 : 0.5),
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Icon(Icons.arrow_forward,
-                            color: Colors.white.withOpacity(allTasksDone ? 1 : 0.5)),
-                      ],
-                    ),
-                  ),
+                  enabled: allTasksDone,
                 ),
               ),
             ],
@@ -220,34 +194,112 @@ class _TaskTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Colors.grey[900]!.withOpacity(0.7), // <--- прозрачность 70%
+    return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: const Color(0xFFDDAEF5),
-          child: Icon(icon, color: Colors.purple.shade800),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
+      decoration: BoxDecoration(
+        color: Colors.grey[900]!.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          splashColor: Colors.white.withOpacity(0.08),
+          highlightColor: Colors.white.withOpacity(0.04),
+          onTap: onTap,
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: const Color(0xFFDDAEF5),
+              child: Icon(icon, color: Colors.purple.shade800),
+            ),
+            title: Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 18,
+              ),
+            ),
+            subtitle: Text(
+              subtitle,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontWeight: FontWeight.w400,
+                fontSize: 15,
+              ),
+            ),
+            trailing: done
+                ? const Icon(Icons.check_circle, color: Colors.green)
+                : Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.7)),
           ),
         ),
-        subtitle: Text(
-          subtitle,
-          style: const TextStyle(
-            color: Colors.white70,
-            fontWeight: FontWeight.w400,
-            fontSize: 15,
+      ),
+    );
+  }
+}
+
+class GradientButton extends StatelessWidget {
+  final String text;
+  final VoidCallback? onTap;
+  final bool enabled;
+  final IconData? icon;
+
+  const GradientButton({
+    super.key,
+    required this.text,
+    required this.onTap,
+    this.enabled = true,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: double.infinity,
+        height: 56,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18),
+          gradient: enabled
+              ? const LinearGradient(
+                  colors: [
+                    Color(0xFFDE3DF6),
+                    Color(0xFF7B1FF6),
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                )
+              : null,
+          color: enabled ? null : Colors.grey[800]!.withOpacity(0.35), // 65% прозрачности
+          border: Border.all(
+            color: enabled
+                ? Colors.white
+                : Colors.grey.withOpacity(0.25), // Тонкая окантовка всегда
+            width: 1, // Всегда тонкая
           ),
         ),
-        trailing: done
-            ? const Icon(Icons.check_circle, color: Colors.green)
-            : Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.7)),
-        onTap: onTap,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              text,
+              style: TextStyle(
+                color: Colors.white.withOpacity(enabled ? 1 : 0.5),
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'SFProDisplay',
+              ),
+            ),
+            if (icon != null) ...[
+              const SizedBox(width: 12),
+              Icon(icon, color: Colors.white.withOpacity(enabled ? 1 : 0.5)),
+            ],
+          ],
+        ),
       ),
     );
   }

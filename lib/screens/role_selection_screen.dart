@@ -28,10 +28,10 @@ class RoleSelectionScreen extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // Баннер как фон
+          // Новый баннер как фон
           Positioned.fill(
             child: Image.asset(
-              'assets/giveaway_banner.png',
+              'assets/main_banner.png',
               fit: BoxFit.cover,
             ),
           ),
