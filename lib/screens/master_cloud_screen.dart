@@ -113,19 +113,25 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+                          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18), // чуть меньше паддинг
+                          constraints: const BoxConstraints(minHeight: 54, minWidth: 110), // чуть меньше высота
                           decoration: BoxDecoration(
                             color: isSelected ? Colors.white : Colors.transparent,
                             borderRadius: BorderRadius.circular(30),
                             border: Border.all(color: Colors.white),
                           ),
-                          child: Text(
-                            cat,
-                            style: TextStyle(
-                              color: isSelected ? Colors.black : Colors.white,
-                              fontFamily: 'Lepka',
-                              fontSize: 18,
-                              height: 1.2,
+                          child: Center(
+                            child: Text(
+                              cat,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: isSelected ? Colors.black : Colors.white,
+                                fontFamily: 'Lepka', // Всегда Lepka
+                                fontSize: 20,        // Чуть больше для выразительности
+                                height: 1.05,        // Подобрано для лучшего вертикального центрирования
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.2,  // Для лучшей читаемости латиницы в Lepka
+                              ),
                             ),
                           ),
                         ),
@@ -138,12 +144,13 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   child: GridView.builder(
+                    clipBehavior: Clip.none,
                     itemCount: masters.length,
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
-                      mainAxisSpacing: 20,
-                      crossAxisSpacing: 20,
-                      childAspectRatio: 0.8,
+                      mainAxisSpacing: 16, // чуть меньше
+                      crossAxisSpacing: 16,
+                      childAspectRatio: 0.75, // чуть выше карточки
                     ),
                     itemBuilder: (context, i) {
                       final m = masters[i];
@@ -157,30 +164,46 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 2),
+                            GestureDetector(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => MasterDetailScreen(master: m),
+                                ),
                               ),
-                              child: CircleAvatar(
-                                backgroundImage: AssetImage(m.avatar),
-                                radius: avatarSize / 2,
-                                backgroundColor: Colors.transparent,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white, width: 2),
+                                ),
+                                child: CircleAvatar(
+                                  backgroundImage: AssetImage(m.avatar),
+                                  radius: avatarSize / 2.3,
+                                  backgroundColor: Colors.transparent,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Text(
-                              m.name,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'Lepka',
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
+                            GestureDetector(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => MasterDetailScreen(master: m),
+                                ),
                               ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                              child: Text(
+                                m.name,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Lepka',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ),
