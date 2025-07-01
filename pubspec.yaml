@@ -1,4 +1,4 @@
-name: myapp1
+name: FSR
 description: "A new Flutter project."
 publish_to: 'none'
 version: 0.1.0
@@ -28,6 +28,8 @@ flutter:
     - assets/avatar6.png
     - assets/center_memoji.png
     - assets/giveaway_banner.png
+    - assets/master_detail_banner.png
+    - assets/master_cloud_banner.png
     - assets/role_selection_banner.png
     - assets/city_selection_banner.png
     - assets/main_banner.png
