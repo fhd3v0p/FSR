@@ -136,7 +136,7 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
                                                                 color: Colors.white,
                                                                 fontWeight: FontWeight.bold,
                                                                 fontSize: city.size / 2.2,
-                                                                fontFamily: 'Lepka',
+                                                                fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
                                                                 letterSpacing: 1,
                                                                 height: 1,
                                                               ),
@@ -188,7 +188,7 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
                                                       color: Colors.white,
                                                       fontWeight: FontWeight.bold,
                                                       fontSize: city.size / 2.2,
-                                                      fontFamily: 'Lepka',
+                                                      fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
                                                       letterSpacing: 1,
                                                       height: 1,
                                                     ),

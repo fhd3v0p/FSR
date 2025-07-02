@@ -156,7 +156,7 @@ class _RoleCircleState extends State<_RoleCircle> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(widget.icon, color: Colors.white, size: 48),
+              Icon(widget.icon, color: Color(0xFFFF6EC7), size: 48),
               const SizedBox(height: 18),
               Text(
                 widget.label,

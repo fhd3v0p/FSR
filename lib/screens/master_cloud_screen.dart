@@ -129,9 +129,9 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: isSelected ? Colors.black : Colors.white,
-                                fontFamily: 'Lepka', // Всегда Lepka
-                                fontSize: 20,        // Чуть больше для выразительности
-                                height: 1.05,        // Подобрано для лучшего вертикального центрирования
+                                fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
+                                fontSize: 20,
+                                height: 1.05,
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 1.2,  // Для лучшей читаемости латиницы в Lepka
                               ),

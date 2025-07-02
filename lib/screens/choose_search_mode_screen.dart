@@ -103,21 +103,21 @@ class _ModeButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
           gradient: const LinearGradient(
-            colors: [Color(0xFFDE3DF6), Color(0xFF7B1FF6)],
+            colors: [Color(0xFFFF6EC7), Color(0xFFFF6EC7)], // розовый градиент
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ),
-          border: Border.all(color: Colors.white, width: 1.5),
+          border: Border.all(color: Color(0xFFFF6EC7), width: 1.5), // розовая окантовка
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: Colors.white, size: 32),
+            Icon(icon, color: Color(0xFFFF6EC7), size: 32), // розовая иконка
             const SizedBox(width: 18),
             Text(
               text,
               style: const TextStyle(
-                color: Colors.white,
+                color: Color(0xFFFF6EC7), // розовый текст
                 fontFamily: 'SFProDisplay',
                 fontWeight: FontWeight.bold,
                 fontSize: 22,

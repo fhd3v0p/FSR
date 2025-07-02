@@ -169,10 +169,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 'Fresh Style Russia',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 54, // Было 36, стало в 1.5 раза больше
+                  fontSize: 54,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  fontFamily: 'Lepka',
+                  fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
                 ),
               ),
               const SizedBox(height: 12),

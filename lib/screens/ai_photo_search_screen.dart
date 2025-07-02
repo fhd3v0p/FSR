@@ -107,19 +107,19 @@ class _AiPhotoSearchScreenState extends State<AiPhotoSearchScreen> {
                     onPressed: () {
                       // TODO: реализовать загрузку фото
                     },
-                    icon: const Icon(Icons.upload_file_rounded, color: Color(0xFFDE3DF6)),
+                    icon: const Icon(Icons.upload_file_rounded, color: Color(0xFFFF6EC7)),
                     label: const Text(
                       'Загрузить фото',
                       style: TextStyle(
                         fontFamily: 'SFProDisplay',
                         fontWeight: FontWeight.w600,
                         fontSize: 20,
-                        color: Color(0xFFDE3DF6),
+                        color: Color(0xFFFF6EC7),
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFFDE3DF6),
+                      foregroundColor: const Color(0xFFFF6EC7),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18),
                       ),

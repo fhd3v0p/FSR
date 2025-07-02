@@ -56,119 +56,129 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: const SizedBox.shrink(), // убираем русское слово "Гивевей"
-        centerTitle: true,
-        elevation: 0,
-      ),
       body: Stack(
         children: [
-          // Баннер как фон
+          // Фон: оба баннера друг над другом
           Positioned.fill(
-            child: Image.asset(
-              'assets/giveaway_banner.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-          // Затемнение для читаемости текста (по желанию)
-          Positioned.fill(
-            child: Container(
-              color: Colors.black.withOpacity(0.15),
-            ),
-          ),
-          // Надпись GIVEAWAY между верхом и таймером
-          Positioned(
-            top: 8,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Text(
-                'GIVEAWAY',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 90,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Lepka',
-                  letterSpacing: 2,
+            child: Stack(
+              children: [
+                Image.asset(
+                  'assets/giveaway_back_banner.png',
+                  width: double.infinity,
+                  height: double.infinity,
+                  fit: BoxFit.cover,
                 ),
-              ),
-            ),
-          ),
-          // Основной контент
-          Column(
-            children: [
-              const SizedBox(height: 80), // увеличиваем отступ, чтобы таймер был ниже надписи
-              // Таймер — крупный, адаптивный
-              SizedBox(
-                height: 180,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    _formatDuration(_timeLeft),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 160,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -2,
+                // Уменьшаем giveaway_banner.png на 20% и центрируем
+                Center(
+                  child: Transform.scale(
+                    scale: 0.8, // уменьшение на 20%
+                    child: Image.asset(
+                      'assets/giveaway_banner.png',
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
-              ),
-              const Spacer(),
-              // Список заданий внизу, но над кнопкой
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                child: Column(
-                  children: [
-                    _TaskTile(
-                      title: 'Подписаться на Telegram-папку',
-                      subtitle: '10 каналов одним кликом\n+1000 XP',
-                      icon: Icons.folder_special,
-                      onTap: () async {
-                        // Открыть ссылку на Telegram-папку
-                        const url = 'https://t.me/addlist/IcPQxDiYrwU3Mjgy';
-                        if (await canLaunchUrl(Uri.parse(url))) {
-                          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                        }
-                        // Отметить задание выполненным
-                        setState(() {
-                          _task1Done = true;
-                        });
-                      },
-                      done: _task1Done,
-                    ),
-                    _TaskTile(
-                      title: 'Пригласить друзей',
-                      subtitle: 'За каждого друга: +100 XP',
-                      icon: Icons.person_add_alt_1,
-                      onTap: () {
-                        setState(() {
-                          _task2Done = true;
-                        });
-                      },
-                      done: _task2Done,
-                    ),
-                  ],
+                // Затемнение для читаемости текста (по желанию)
+                Container(
+                  color: Colors.black.withOpacity(0.15),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: GradientButton(
-                  text: 'Перейти в приложение',
-                  onTap: allTasksDone
-                      ? () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (_) => const RoleSelectionScreen(),
-                            ),
-                          );
-                        }
-                      : null,
-                  enabled: allTasksDone,
+              ],
+            ),
+          ),
+          // Контент поверх фона
+          SafeArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Бокс для заголовка GIVEAWAY
+                Container(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'GIVEAWAY',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 54,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'NauryzKeds',
+                      letterSpacing: 2,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                // Бокс для таймера
+                Container(
+                  alignment: Alignment.center,
+                  child: SizedBox(
+                    height: 180,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        _formatDuration(_timeLeft),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 160,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -2,
+                          fontFamily: 'NauryzKeds',
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const Spacer(),
+                // Список заданий
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                  child: Column(
+                    children: [
+                      _TaskTile(
+                        title: 'Подписаться на Telegram-папку',
+                        subtitle: '10 каналов одним кликом\n+1000 XP',
+                        icon: Icons.folder_special,
+                        onTap: () async {
+                          const url = 'https://t.me/addlist/IcPQxDiYrwU3Mjgy';
+                          if (await canLaunchUrl(Uri.parse(url))) {
+                            await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                          }
+                          setState(() {
+                            _task1Done = true;
+                          });
+                        },
+                        done: _task1Done,
+                      ),
+                      _TaskTile(
+                        title: 'Пригласить друзей',
+                        subtitle: 'За каждого друга: +100 XP',
+                        icon: Icons.person_add_alt_1,
+                        onTap: () {
+                          setState(() {
+                            _task2Done = true;
+                          });
+                        },
+                        done: _task2Done,
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: GradientButton(
+                    text: 'Перейти в приложение',
+                    onTap: allTasksDone
+                        ? () {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (_) => const RoleSelectionScreen(),
+                              ),
+                            );
+                          }
+                        : null,
+                    enabled: allTasksDone,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -198,20 +208,20 @@ class _TaskTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.grey[900]!.withOpacity(0.7),
-        borderRadius: BorderRadius.circular(18),
+        // Убрали borderRadius
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(18),
+        // Убрали borderRadius
         child: InkWell(
-          borderRadius: BorderRadius.circular(18),
+          // Убрали borderRadius
           splashColor: Colors.white.withOpacity(0.08),
           highlightColor: Colors.white.withOpacity(0.04),
           onTap: onTap,
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: const Color(0xFFDDAEF5),
-              child: Icon(icon, color: Colors.purple.shade800),
+              backgroundColor: const Color(0xFFFF6EC7),
+              child: Icon(icon, color: Colors.white),
             ),
             title: Text(
               title,
@@ -262,24 +272,26 @@ class GradientButton extends StatelessWidget {
         width: double.infinity,
         height: 56,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.zero, // острые углы
           gradient: enabled
               ? const LinearGradient(
                   colors: [
-                    Color(0xFFDE3DF6),
-                    Color(0xFF7B1FF6),
+                    Colors.white,
+                    Color(0xFFFFE3F3), // очень светло-розовый
                   ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 )
               : null,
-          color: enabled ? null : Colors.grey[800]!.withOpacity(0.35), // 65% прозрачности
-          border: Border.all(
-            color: enabled
-                ? Colors.white
-                : Colors.grey.withOpacity(0.25), // Тонкая окантовка всегда
-            width: 1, // Всегда тонкая
-          ),
+          color: enabled
+              ? null
+              : Colors.grey[900]!.withOpacity(0.7),
+          border: enabled
+              ? Border.all(
+                  color: Color(0xFFFF6EC7),
+                  width: 1,
+                )
+              : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -288,7 +300,9 @@ class GradientButton extends StatelessWidget {
             Text(
               text,
               style: TextStyle(
-                color: Colors.white.withOpacity(enabled ? 1 : 0.5),
+                color: enabled
+                    ? Color(0xFFFF6EC7)
+                    : Colors.white.withOpacity(0.6),
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
                 fontFamily: 'SFProDisplay',
@@ -296,7 +310,12 @@ class GradientButton extends StatelessWidget {
             ),
             if (icon != null) ...[
               const SizedBox(width: 12),
-              Icon(icon, color: Colors.white.withOpacity(enabled ? 1 : 0.5)),
+              Icon(
+                icon,
+                color: enabled
+                    ? Color(0xFFFF6EC7)
+                    : Colors.white.withOpacity(0.6),
+              ),
             ],
           ],
         ),

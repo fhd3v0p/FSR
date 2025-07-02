@@ -28,7 +28,7 @@ class CircleOption extends StatelessWidget {
             color: Colors.white,
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            fontFamily: 'Lepka',
+            fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
           ),
         ),
       ),

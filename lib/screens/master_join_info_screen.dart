@@ -65,7 +65,7 @@ class _MasterJoinInfoScreenState extends State<MasterJoinInfoScreen> with Ticker
         title: const Text(
           'For Masters',
           style: TextStyle(
-            fontFamily: 'Lepka',
+            fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
             color: Colors.white,
             fontSize: 56, // В 2 раза больше
             fontWeight: FontWeight.bold,
@@ -142,8 +142,8 @@ class _MasterJoinInfoScreenState extends State<MasterJoinInfoScreen> with Ticker
                       borderRadius: BorderRadius.circular(24),
                       gradient: const LinearGradient(
                         colors: [
-                          Color(0xFFDE3DF6),
-                          Color(0xFF7B1FF6),
+                          Color(0xFFFF6EC7),
+                          Color(0xFFFF6EC7),
                         ],
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,

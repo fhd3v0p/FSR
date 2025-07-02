@@ -64,7 +64,7 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                 Padding(
                   padding: const EdgeInsets.only(left: 8, top: 8, right: 0),
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFFF6EC7)),
                     onPressed: () => Navigator.of(context).maybePop(),
                     splashRadius: 24,
                   ),
@@ -97,27 +97,27 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                                   color: Colors.white,
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
-                                  fontFamily: 'Lepka',
+                                  fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
                                 ),
                               ),
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  const Icon(Icons.telegram, color: Colors.white70, size: 20),
+                                  const Icon(Icons.telegram, color: Color(0xFFFF6EC7), size: 20),
                                   const SizedBox(width: 6),
                                   Text(master.telegram, style: const TextStyle(color: Colors.white70, fontFamily: 'SFProDisplay')),
                                 ],
                               ),
                               Row(
                                 children: [
-                                  const Icon(Icons.camera_alt_outlined, color: Colors.white70, size: 20),
+                                  const Icon(Icons.camera_alt_outlined, color: Color(0xFFFF6EC7), size: 20),
                                   const SizedBox(width: 6),
                                   Text(master.instagram, style: const TextStyle(color: Colors.white70, fontFamily: 'SFProDisplay')),
                                 ],
                               ),
                               Row(
                                 children: [
-                                  const Icon(Icons.music_note, color: Colors.white70, size: 20),
+                                  const Icon(Icons.music_note, color: Color(0xFFFF6EC7), size: 20),
                                   const SizedBox(width: 6),
                                   Text(master.tiktok, style: const TextStyle(color: Colors.white70, fontFamily: 'SFProDisplay')),
                                 ],
@@ -141,7 +141,7 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.location_on, color: Colors.white70),
+                      const Icon(Icons.location_on, color: Color(0xFFFF6EC7)),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Column(
@@ -184,7 +184,7 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.calendar_month, color: Colors.white.withOpacity(0.5), size: 28),
+                      Icon(Icons.calendar_month, color: Color(0xFFFF6EC7), size: 28),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(

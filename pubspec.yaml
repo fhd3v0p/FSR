@@ -19,6 +19,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
   assets:
     - assets/avatar1.png
     - assets/avatar2.png
@@ -41,13 +42,27 @@ flutter:
     - assets/m6.png
     - assets/work1.png
     - assets/work2.png
+
   fonts:
+    - family: OpenSans
+      fonts:
+        - asset: assets/fonts/OpenSans-Regular.ttf
+        - asset: assets/fonts/OpenSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/OpenSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/OpenSans-Light.ttf
+          weight: 300
+        - asset: assets/fonts/OpenSans-Italic.ttf
+          style: italic
     - family: Lepka
       fonts:
         - asset: assets/fonts/Lepka.otf
-          weight: 400
     - family: SFProDisplay
       fonts:
         - asset: assets/fonts/SF-Pro-Display-Regular.otf
         - asset: assets/fonts/SF-Pro-Display-Bold.otf
           weight: 700
+    - family: NauryzKeds
+      fonts:
+        - asset: assets/fonts/NauryzKeds.ttf
