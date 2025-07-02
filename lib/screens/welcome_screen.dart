@@ -86,8 +86,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start, // прижимаем всё к верху
             children: [
+              const SizedBox(height: 8), // минимальный отступ сверху
               SizedBox(
                 width: 320,
                 height: 320,
@@ -108,7 +109,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             height: 224,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: const Color(0xFFFF6EC7).withOpacity(0.4), // ярко-розовый
+                              color: const Color(0xFFFF6EC7).withOpacity(0.4),
                             ),
                           ),
                         ),
@@ -119,7 +120,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             height: 120,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: const Color(0xFFFF6EC7).withOpacity(0.85), // ярко-розовый, плотнее
+                              color: const Color(0xFFFF6EC7).withOpacity(0.85),
                             ),
                           ),
                         ),
@@ -128,7 +129,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           height: 320,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: const Color(0xFFFFB3E6).withOpacity(0.2), // просто розовый цвет без градиента
+                            color: const Color(0xFFFFB3E6).withOpacity(0.2),
                           ),
                         ),
                         for (int i = 0; i < 3; i++)
@@ -150,13 +151,13 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         Container(
                           padding: const EdgeInsets.all(3),
                           decoration: const BoxDecoration(
-                            color: Colors.white, // белая рамка
+                            color: Colors.white,
                             shape: BoxShape.circle,
                           ),
                           child: const CircleAvatar(
                             radius: 36,
                             backgroundImage: AssetImage('assets/center_memoji.png'),
-                            backgroundColor: Color(0xFF33272D), // фон внутри мемодзи теперь #33272D
+                            backgroundColor: Color(0xFF33272D),
                           ),
                         ),
                       ],
@@ -164,15 +165,26 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   },
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 16), // уменьшили отступ после кругов
               const Text(
-                'Fresh Style Russia',
+                'Fresh Style',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 72, // максимальный размер
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontFamily: 'NauryzKeds',
+                ),
+              ),
+              const SizedBox(height: 6), // уменьшили отступ между строками
+              const Text(
+                'Russia',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 54,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
+                  fontFamily: 'NauryzKeds',
                 ),
               ),
               const SizedBox(height: 12),
