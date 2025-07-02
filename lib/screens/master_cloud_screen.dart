@@ -4,6 +4,10 @@ import '../screens/master_detail_screen.dart';
 import '../models/master_model.dart';
 
 class MasterCloudScreen extends StatefulWidget {
+  static const List<String> categories = [
+    'Tattoo', 'Nails', 'Hair', 'Jewelry', 'Custom', 'Location'
+  ];
+
   final String city;
   const MasterCloudScreen({super.key, required this.city});
 
@@ -13,7 +17,6 @@ class MasterCloudScreen extends StatefulWidget {
 
 class _MasterCloudScreenState extends State<MasterCloudScreen> {
   String selectedCategory = 'Tattoo';
-  final categories = ['Tattoo', 'Nails', 'Hair', 'Jewelry', 'Custom'];
 
   final ScrollController _scrollController = ScrollController();
   Timer? _autoScrollTimer;
@@ -100,9 +103,9 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
                   controller: _scrollController,
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                  itemCount: categories.length,
+                  itemCount: MasterCloudScreen.categories.length,
                   itemBuilder: (context, index) {
-                    final cat = categories[index];
+                    final cat = MasterCloudScreen.categories[index];
                     final isSelected = selectedCategory == cat;
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),

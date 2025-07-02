@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'giveaway_screen.dart';
 import 'city_selection_screen.dart';
 import 'master_join_info_screen.dart';
+import 'choose_search_mode_screen.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({super.key});
@@ -57,7 +58,7 @@ class RoleSelectionScreen extends StatelessWidget {
                       icon: Icons.person_outline,
                       onTap: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const CitySelectionScreen()),
+                          MaterialPageRoute(builder: (_) => const ChooseSearchModeScreen()),
                         );
                       },
                       size: circleSize,

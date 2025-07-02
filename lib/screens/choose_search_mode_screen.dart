@@ -24,6 +24,16 @@ class ChooseSearchModeScreen extends StatelessWidget {
               color: Colors.black.withOpacity(0.18),
             ),
           ),
+          // Кнопка назад
+          Positioned(
+            top: 36,
+            left: 12,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28),
+              onPressed: () => Navigator.of(context).maybePop(),
+              splashRadius: 24,
+            ),
+          ),
           // Контент
           Center(
             child: Padding(
