@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -9,10 +10,19 @@ class MasterJoinInfoScreen extends StatefulWidget {
 }
 
 class _MasterJoinInfoScreenState extends State<MasterJoinInfoScreen> with TickerProviderStateMixin {
-  final List<String> advantages = [
-    '⏰ 1. Занятость nonstop, no cap!\n— Клиенты прямо фрагят тебя через TG/WebApp — пустых слотов тупо нет, всё стримится, zero дейс.',
-    '💡 2. Твой Drip = наш контент!\n— Твои тату,маник, окрасы и кастомы — в постоянном дропе хайпа: мемы, сториз, розыгрыши —  просто творишь, а твой стиль набирает бешеные обороты.',
-    '📈 3.  Профессиональный взлёт = твой glow-up!\n— С Fresh Style Russia ты в elite squad: учишься, boost’ишь челленджи, поднимаешь ценник, удлинняешь цифры, укорачиваешь заеб',
+  final List<_AdvantageItem> advantages = [
+    _AdvantageItem(
+      icon: Icons.schedule,
+      text: '1. Занятость nonstop, no cap!\nКлиенты сами фрагят тебя через TG/WebApp — пустых слотов нет, всё стримится.',
+    ),
+    _AdvantageItem(
+      icon: Icons.trending_up,
+      text: '2. Твой Drip = наш контент!\nТвои тату, маник, окрасы и кастомы — постоянно в мемах, сториз, дропах, розыгрышах.',
+    ),
+    _AdvantageItem(
+      icon: Icons.star,
+      text: '3. Профессиональный glow-up!\nС Fresh Style Russia ты в elite squad: челленджи, ап цен, рост цифр и меньше заеб.',
+    ),
   ];
 
   final List<AnimationController> _controllers = [];
@@ -60,122 +70,138 @@ class _MasterJoinInfoScreenState extends State<MasterJoinInfoScreen> with Ticker
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: const Text(
-          'For Artists', // заменили Masters на Artists
-          style: TextStyle(
-            fontFamily: 'NauryzKeds', // уже NauryzKeds
-            color: Colors.white,
-            fontSize: 56, // В 2 раза больше
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2,
-          ),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        toolbarHeight: 100, // чтобы не перекрывался
-      ),
       body: Stack(
         children: [
-          // Новый баннер как фон
           Positioned.fill(
             child: Image.asset(
-              'assets/main_banner.png',
+              'assets/master_join_banner.png',
               fit: BoxFit.cover,
             ),
           ),
-          // Затемнение
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.18), // или 0.25, как на giveaway_screen
+              color: Colors.black.withOpacity(0.25),
             ),
           ),
-          // Контент
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 32),
-                  // Преимущества с анимацией и отдельной рамкой для каждого
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: List.generate(advantages.length, (i) {
-                      return AnimatedBuilder(
-                        animation: _controllers[i],
-                        builder: (context, child) => FadeTransition(
-                          opacity: _fadeAnimations[i],
-                          child: SlideTransition(
-                            position: _offsetAnimations[i],
-                            child: Container(
-                              margin: const EdgeInsets.only(bottom: 18),
-                              padding: const EdgeInsets.all(18),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.10),
-                                borderRadius: BorderRadius.circular(18),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.7),
-                                  width: 1.5,
+          SafeArea(
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white.withOpacity(0.8)),
+                      onPressed: () => Navigator.of(context).pop(),
+                      splashRadius: 24,
+                      tooltip: 'Назад',
+                    ),
+                  ],
+                ),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'FOR ARTISTS',
+                    style: const TextStyle(
+                      fontFamily: 'NauryzKeds',
+                      color: Colors.white,
+                      fontSize: 64, // чуть меньше, чтобы точно помещался
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: ListView.builder(
+                      itemCount: advantages.length,
+                      itemBuilder: (context, i) {
+                        final item = advantages[i];
+                        return AnimatedBuilder(
+                          animation: _controllers[i],
+                          builder: (context, child) => FadeTransition(
+                            opacity: _fadeAnimations[i],
+                            child: SlideTransition(
+                              position: _offsetAnimations[i],
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 16),
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[900]!.withOpacity(0.7),
+                                  border: Border.all(color: Colors.white.withOpacity(0.5)),
                                 ),
-                              ),
-                              child: Text(
-                                advantages[i],
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontFamily: 'SFProDisplay',
-                                  fontWeight: FontWeight.w500,
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Icon(item.icon, color: Colors.white),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        item.text,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontFamily: 'OpenSans',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 32),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFFFF6EC7),
-                          Color(0xFFFF6EC7),
-                        ],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
-                      border: Border.all(color: Colors.white, width: 1),
-                    ),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(24),
-                      onTap: () async {
-                        const url = 'https://t.me/FSR_Adminka';
-                        if (await canLaunchUrl(Uri.parse(url))) {
-                          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                        }
+                        );
                       },
-                      child: const Text(
-                        'Присоединиться',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontFamily: 'SFProDisplay',
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                  child: GestureDetector(
+                    onTap: () async {
+                      const url = 'https://t.me/FSR_Adminka';
+                      if (await canLaunchUrl(Uri.parse(url))) {
+                        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.zero,
+                        color: Colors.white,
+                        border: Border.all(
+                          color: const Color(0xFFFF6EC7),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'ПРИСОЕДИНИТЬСЯ',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 20,
+                            fontFamily: 'NauryzKeds',
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+}
+
+class _AdvantageItem {
+  final IconData icon;
+  final String text;
+  const _AdvantageItem({required this.icon, required this.text});
 }

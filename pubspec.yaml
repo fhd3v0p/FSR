@@ -32,6 +32,7 @@ flutter:
     - assets/master_detail_banner.png
     - assets/master_cloud_banner.png
     - assets/master_cloud_banner1.png
+    - assets/master_join_banner.png
     - assets/role_selection_banner.png
     - assets/city_selection_banner.png
     - assets/main_banner.png
