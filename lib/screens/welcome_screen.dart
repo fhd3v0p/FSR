@@ -85,151 +85,160 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start, // прижимаем всё к верху
-            children: [
-              const SizedBox(height: 8), // минимальный отступ сверху
-              SizedBox(
-                width: 320,
-                height: 320,
-                child: AnimatedBuilder(
-                  animation: _pulseController,
-                  builder: (context, _) {
-                    return Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        CustomPaint(
-                          size: const Size(320, 320),
-                          painter: DottedCirclePainter(),
-                        ),
-                        Transform.scale(
-                          scale: _pulseAnimation.value,
-                          child: Container(
-                            width: 224,
-                            height: 224,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: const Color(0xFFFF6EC7).withOpacity(0.4),
+          child: SingleChildScrollView( // Добавляем скролл для предотвращения overflow
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8), // минимальный отступ сверху
+                // Объединяем все круги, анимированные мемодзи и центр в один контейнер
+                Container(
+                  // Можно добавить top margin/padding для управления позицией блока
+                  child: SizedBox(
+                    width: 320,
+                    height: 320,
+                    child: AnimatedBuilder(
+                      animation: _pulseController,
+                      builder: (context, _) {
+                        return Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            CustomPaint(
+                              size: const Size(320, 320),
+                              painter: DottedCirclePainter(),
                             ),
-                          ),
-                        ),
-                        Transform.scale(
-                          scale: _pulseAnimation.value,
-                          child: Container(
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: const Color(0xFFFF6EC7).withOpacity(0.85),
+                            Transform.scale(
+                              scale: _pulseAnimation.value,
+                              child: Container(
+                                width: 224,
+                                height: 224,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: const Color(0xFFFF6EC7).withOpacity(0.4),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        Container(
-                          width: 320,
-                          height: 320,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFFFB3E6).withOpacity(0.2),
-                          ),
-                        ),
-                        for (int i = 0; i < 3; i++)
-                          Transform.translate(
-                            offset: calculateOrbitPosition(
-                                _orbitAngle + (i * 2 * pi / 3), 160),
-                            child: framedMemoji(avatars[i]),
-                          ),
-                        for (int i = 0; i < 2; i++)
-                          Transform.translate(
-                            offset: calculateOrbitPosition(
-                                -_orbitAngle + (i * pi), 112),
-                            child: framedMemoji(avatars[3 + i]),
-                          ),
-                        Transform.translate(
-                          offset: calculateOrbitPosition(_orbitAngle, 86),
-                          child: framedMemoji(avatars[5]),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(3),
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const CircleAvatar(
-                            radius: 36,
-                            backgroundImage: AssetImage('assets/center_memoji.png'),
-                            backgroundColor: Color(0xFF33272D),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                            Transform.scale(
+                              scale: _pulseAnimation.value,
+                              child: Container(
+                                width: 120,
+                                height: 120,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: const Color(0xFFFF6EC7).withOpacity(0.85),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: 320,
+                              height: 320,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: const Color(0xFFFFB3E6).withOpacity(0.2),
+                              ),
+                            ),
+                            for (int i = 0; i < 3; i++)
+                              Transform.translate(
+                                offset: calculateOrbitPosition(
+                                    _orbitAngle + (i * 2 * pi / 3), 160),
+                                child: framedMemoji(avatars[i]),
+                              ),
+                            for (int i = 0; i < 2; i++)
+                              Transform.translate(
+                                offset: calculateOrbitPosition(
+                                    -_orbitAngle + (i * pi), 112),
+                                child: framedMemoji(avatars[3 + i]),
+                              ),
+                            Transform.translate(
+                              offset: calculateOrbitPosition(_orbitAngle, 86),
+                              child: framedMemoji(avatars[5]),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(3),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const CircleAvatar(
+                                radius: 36,
+                                backgroundImage: AssetImage('assets/center_memoji.png'),
+                                backgroundColor: Color(0xFF33272D),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16), // уменьшили отступ после кругов
-              const Text(
-                'Fresh Style',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 72, // максимальный размер
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontFamily: 'NauryzKeds',
+                const SizedBox(height: 32), // увеличили отступ после круга
+                const Text(
+                  'Fresh Style',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 74,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontFamily: 'NauryzKeds',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 6), // уменьшили отступ между строками
-              const Text(
-                'Russia',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 54,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontFamily: 'NauryzKeds',
+                // Минимальный отступ между строками
+                const SizedBox(height: 2),
+                const Text(
+                  'Russia',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 74,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontFamily: 'NauryzKeds',
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Find smarter, connect faster with AI search!',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Colors.white70,
-                ),
-              ),
-              const SizedBox(height: 32),
-              Listener(
-                onPointerMove: (event) {
-                  final box = context.findRenderObject() as RenderBox;
-                  final localPosition = box.globalToLocal(event.position);
-                  final width = box.size.width - 48;
-                  final progress = (localPosition.dx - 24) / width;
-                  _onSlideChange(progress);
-                },
-                child: SlideAction(
-                  text: 'Проведите для начала',
-                  textStyle: TextStyle(
-                    color: Colors.white.withOpacity(0.7), // светло-серая, светлее фона
+                const SizedBox(height: 6), // уменьшили отступ в 2 раза
+
+                const Text(
+                  'Find smarter, connect faster with AI search!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
                     fontSize: 20,
+                    color: Colors.white70,
                   ),
-                  outerColor: Colors.white70.withOpacity(0.35), // фон слайдера
-                  innerColor: Colors.white, // круг белый всегда
-                  sliderButtonIcon: Icon(
-                    Icons.arrow_forward,
-                    color: Color(0xFFFF6EC7), // стрелочка розовая всегда
-                  ),
-                  elevation: 0,
-                  borderRadius: 50,
-                  onSubmit: () {
-                    Future.microtask(() {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (_) => const GiveawayScreen()),
-                      );
-                    });
-                    return null;
-                  },
                 ),
-              ),
-            ],
+                const SizedBox(height: 16), // уменьшили отступ в 2 раза
+
+                Listener(
+                  onPointerMove: (event) {
+                    final box = context.findRenderObject() as RenderBox;
+                    final localPosition = box.globalToLocal(event.position);
+                    final width = box.size.width - 48;
+                    final progress = (localPosition.dx - 24) / width;
+                    _onSlideChange(progress);
+                  },
+                  child: SlideAction(
+                    text: 'Проведите для начала',
+                    textStyle: TextStyle(
+                      color: Colors.white.withOpacity(0.7),
+                      fontSize: 20,
+                    ),
+                    outerColor: Colors.white70.withOpacity(0.35),
+                    innerColor: Colors.white,
+                    sliderButtonIcon: Icon(
+                      Icons.arrow_forward,
+                      color: Color(0xFFFF6EC7),
+                    ),
+                    elevation: 0,
+                    borderRadius: 50,
+                    onSubmit: () {
+                      Future.microtask(() {
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(builder: (_) => const GiveawayScreen()),
+                        );
+                      });
+                      return null;
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
