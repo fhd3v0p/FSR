@@ -173,8 +173,15 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                     onTap: allTasksDone
                         ? () {
                             Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (_) => const RoleSelectionScreen(),
+                              PageRouteBuilder(
+                                pageBuilder: (_, __, ___) => const RoleSelectionScreen(),
+                                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  );
+                                },
+                                transitionDuration: const Duration(milliseconds: 350),
                               ),
                             );
                           }

@@ -45,20 +45,17 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
       backgroundColor: const Color(0xFF232026),
       body: Stack(
         children: [
-          // Баннер на всю страницу
           Positioned.fill(
             child: Image.asset(
               'assets/city_selection_banner.png',
               fit: BoxFit.cover,
             ),
           ),
-          // Затемнение экрана при выборе города (кроме кнопки)
-          if (_selectedCity != null)
-            Positioned.fill(
-              child: Container(
-                color: Colors.black.withOpacity(0.75),
-              ),
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.18),
             ),
+          ),
           // Контент
           SafeArea(
             child: Column(
@@ -212,9 +209,8 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
                                   ),
                               ],
                             ),
-                          ),
-                        );
-                      }).toList(),
+                          );
+                        }).toList(),
                     ],
                   ),
                 ),

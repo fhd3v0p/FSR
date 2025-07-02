@@ -88,11 +88,17 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
       ),
       body: Stack(
         children: [
-          // Фон master_cloud_banner.png
+          // Фон
           Positioned.fill(
             child: Image.asset(
               'assets/master_cloud_banner.png',
               fit: BoxFit.cover,
+            ),
+          ),
+          // Затемнение
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.18),
             ),
           ),
           Column(

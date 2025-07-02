@@ -181,8 +181,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     fontFamily: 'NauryzKeds',
                   ),
                 ),
-                // Минимальный отступ между строками
-                const SizedBox(height: 2),
+                // Уменьшенный отступ между "Fresh Style" и "Russia" - теперь в 2 раза меньше
+                const SizedBox(height: 1),
                 const Text(
                   'Russia',
                   textAlign: TextAlign.center,
@@ -229,11 +229,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     borderRadius: 50,
                     onSubmit: () {
                       Future.microtask(() {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(builder: (_) => const GiveawayScreen()),
-                        );
+                        navigateWithFade(context, const GiveawayScreen());ayScreen());
                       });
-                      return null;
+                      return null;rn null;
                     },
                   ),
                 ),
@@ -245,47 +243,47 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 
-  Widget framedMemoji(String path) {
-    return Container(
-      padding: const EdgeInsets.all(2),
-      decoration: const BoxDecoration(
+  Widget framedMemoji(String path) {idget framedMemoji(String path) {
+    return Container(    return Container(
+      padding: const EdgeInsets.all(2),2),
+      decoration: const BoxDecoration(st BoxDecoration(
         color: Colors.white,
         shape: BoxShape.circle,
       ),
       child: CircleAvatar(
-        radius: 20,
-        backgroundImage: AssetImage(path),
-        backgroundColor: Colors.black, // фон внутри аватаров теперь чёрный
+        radius: 20,radius: 20,
+        backgroundImage: AssetImage(path),ssetImage(path),
+        backgroundColor: Colors.black, // фон внутри аватаров теперь чёрныйolor: Colors.black, // фон внутри аватаров теперь чёрный
       ),
     );
   }
 }
 
-class DottedCirclePainter extends CustomPainter {
-  @override
+class DottedCirclePainter extends CustomPainter {lass DottedCirclePainter extends CustomPainter {
+  @override  @override
   void paint(Canvas canvas, Size size) {
-    const double dashWidth = 5;
+    const double dashWidth = 5;ouble dashWidth = 5;
     const double dashSpace = 5;
     final paint = Paint()
       ..color = Colors.white
       ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
+      ..style = PaintingStyle.stroke;e.stroke;
 
     final radius = size.width / 2;
-    final circumference = 2 * pi * radius;
-    final dashCount = circumference ~/ (dashWidth + dashSpace);
-    final adjustedDashAngle = 2 * pi / dashCount;
+    final circumference = 2 * pi * radius;    final circumference = 2 * pi * radius;
+    final dashCount = circumference ~/ (dashWidth + dashSpace);e ~/ (dashWidth + dashSpace);
+    final adjustedDashAngle = 2 * pi / dashCount;hCount;
 
     for (int i = 0; i < dashCount; i++) {
-      final startAngle = i * adjustedDashAngle;
-      final x1 = radius + radius * cos(startAngle);
-      final y1 = radius + radius * sin(startAngle);
-      final x2 = radius + radius * cos(startAngle + adjustedDashAngle / 2);
-      final y2 = radius + radius * sin(startAngle + adjustedDashAngle / 2);
+      final startAngle = i * adjustedDashAngle;      final startAngle = i * adjustedDashAngle;
+      final x1 = radius + radius * cos(startAngle);artAngle);
+      final y1 = radius + radius * sin(startAngle);le);
+      final x2 = radius + radius * cos(startAngle + adjustedDashAngle / 2); adjustedDashAngle / 2);
+      final y2 = radius + radius * sin(startAngle + adjustedDashAngle / 2); adjustedDashAngle / 2);
       canvas.drawLine(Offset(x1, y1), Offset(x2, y2), paint);
     }
   }
 
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
+  @overrideoverride
+  bool shouldRepaint(CustomPainter oldDelegate) => false;  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

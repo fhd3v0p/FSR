@@ -88,7 +88,7 @@ class _MasterJoinInfoScreenState extends State<MasterJoinInfoScreen> with Ticker
           // Затемнение
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.4),
+              color: Colors.black.withOpacity(0.18), // или 0.25, как на giveaway_screen
             ),
           ),
           // Контент

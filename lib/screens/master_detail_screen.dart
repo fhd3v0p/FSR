@@ -48,11 +48,15 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Фон на весь экран
           Positioned.fill(
             child: Image.asset(
               'assets/master_detail_banner.png',
               fit: BoxFit.cover,
+            ),
+          ),
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.18),
             ),
           ),
           // Контент поверх фона
@@ -252,6 +256,12 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
             ),
           ),
           // --- Модальное окно просмотра фото ---
+          if (_galleryIndex != null)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withOpacity(0.18), // или 0.25, как на giveaway_screen
+              ),
+            ),
           if (_galleryIndex != null)
             Positioned.fill(
               child: Container(

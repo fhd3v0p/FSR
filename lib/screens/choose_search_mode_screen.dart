@@ -11,14 +11,12 @@ class ChooseSearchModeScreen extends StatelessWidget {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Фон как в giveaway
           Positioned.fill(
             child: Image.asset(
               'assets/giveaway_banner.png',
               fit: BoxFit.cover,
             ),
           ),
-          // Затемнение для читаемости
           Positioned.fill(
             child: Container(
               color: Colors.black.withOpacity(0.18),

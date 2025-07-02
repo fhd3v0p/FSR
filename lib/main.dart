@@ -31,3 +31,33 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+void navigateWithFade(BuildContext context, Widget page) {
+  Navigator.of(context).push(
+    PageRouteBuilder(
+      pageBuilder: (_, __, ___) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 350),
+    ),
+  );
+}
+
+void navigateWithFadeReplacement(BuildContext context, Widget page) {
+  Navigator.of(context).pushReplacement(
+    PageRouteBuilder(
+      pageBuilder: (_, __, ___) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 350),
+    ),
+  );
+}
