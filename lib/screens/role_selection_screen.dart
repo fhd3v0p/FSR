@@ -37,7 +37,7 @@ class RoleSelectionScreen extends StatelessWidget {
           ),
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.18),
+              color: Colors.black.withOpacity(0.25),
             ),
           ),
           // Контент
@@ -52,7 +52,7 @@ class RoleSelectionScreen extends StatelessWidget {
                   Positioned(
                     left: 0,
                     child: _RoleCircle(
-                      label: 'клиент',
+                      label: 'client',
                       icon: Icons.person_outline,
                       onTap: () {
                         Navigator.of(context).push(
@@ -66,7 +66,7 @@ class RoleSelectionScreen extends StatelessWidget {
                   Positioned(
                     right: 0,
                     child: _RoleCircle(
-                      label: 'мастер',
+                      label: 'artist',
                       icon: Icons.star_outline,
                       onTap: () {
                         Navigator.of(context).push(
@@ -76,27 +76,22 @@ class RoleSelectionScreen extends StatelessWidget {
                       size: circleSize,
                     ),
                   ),
+                  // Буква "Я" в центре пересечения
+                  Text(
+                    'Я',
+                    style: TextStyle(
+                      fontFamily: 'NauryzKeds',
+                      fontSize: 70, // Подберите максимальный размер под ваш дизайн
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      height: 1,
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
-          // Заголовок
-          Positioned(
-            top: 60,
-            left: 0,
-            right: 0,
-            child: const Center(
-              child: Text(
-                'Выберите роль',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'SFProDisplay',
-                ),
-              ),
-            ),
-          ),
+    
         ],
       ),
     );
@@ -162,7 +157,7 @@ class _RoleCircleState extends State<_RoleCircle> {
                   color: Colors.white,
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
-                  fontFamily: 'SFProDisplay',
+                  fontFamily: 'OpenSans',
                 ),
               ),
             ],

@@ -63,9 +63,9 @@ class _MasterJoinInfoScreenState extends State<MasterJoinInfoScreen> with Ticker
       appBar: AppBar(
         backgroundColor: Colors.black,
         title: const Text(
-          'For Masters',
+          'For Artists', // заменили Masters на Artists
           style: TextStyle(
-            fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
+            fontFamily: 'NauryzKeds', // уже NauryzKeds
             color: Colors.white,
             fontSize: 56, // В 2 раза больше
             fontWeight: FontWeight.bold,

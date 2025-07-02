@@ -40,11 +40,11 @@ class ChooseSearchModeScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'Как вы хотите искать мастера?',
+                    'Как вы хотите искать артиста?',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
-                      fontFamily: 'Lepka',
+                      fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
                       fontSize: 38,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
@@ -53,7 +53,7 @@ class ChooseSearchModeScreen extends StatelessWidget {
                   const SizedBox(height: 32),
                   _ModeButton(
                     icon: Icons.list_alt_rounded,
-                    text: 'Каталог мастеров',
+                    text: 'Каталог артистов', // заменили мастеров на артистов
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const CitySelectionScreen()),
@@ -99,24 +99,20 @@ class _ModeButton extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 18),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFF6EC7), Color(0xFFFF6EC7)], // розовый градиент
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-          border: Border.all(color: Color(0xFFFF6EC7), width: 1.5), // розовая окантовка
+          borderRadius: BorderRadius.zero, // острые углы
+          color: Colors.white.withOpacity(0.08), // как на giveaway
+          border: Border.all(color: Colors.white, width: 1.5), // белая окантовка
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: Color(0xFFFF6EC7), size: 32), // розовая иконка
+            Icon(icon, color: Colors.white, size: 32), // белая иконка
             const SizedBox(width: 18),
             Text(
               text,
               style: const TextStyle(
-                color: Color(0xFFFF6EC7), // розовый текст
-                fontFamily: 'SFProDisplay',
+                color: Colors.white, // белый текст
+                fontFamily: 'NauryzKeds', // заменили SFProDisplay на NauryzKeds
                 fontWeight: FontWeight.bold,
                 fontSize: 22,
                 letterSpacing: 1.1,

@@ -60,7 +60,7 @@ class _AiPhotoSearchScreenState extends State<AiPhotoSearchScreen> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
-                      fontFamily: 'Lepka',
+                      fontFamily: 'NauryzKeds', // Lepka → NauryzKeds
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
@@ -73,7 +73,7 @@ class _AiPhotoSearchScreenState extends State<AiPhotoSearchScreen> {
                     iconEnabledColor: Colors.white,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontFamily: 'SFProDisplay',
+                      fontFamily: 'NauryzKeds', // SFProDisplay → NauryzKeds
                       fontSize: 18,
                     ),
                     items: categories
@@ -90,11 +90,11 @@ class _AiPhotoSearchScreenState extends State<AiPhotoSearchScreen> {
                   ),
                   const SizedBox(height: 32),
                   const Text(
-                    'Загрузите фото-референс\nдля AI-подбора мастера',
+                    'Загрузите фото-референс\nдля AI-подбора артиста', // мастер → артист
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
-                      fontFamily: 'Lepka',
+                      fontFamily: 'NauryzKeds', // Lepka → NauryzKeds
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
@@ -105,23 +105,26 @@ class _AiPhotoSearchScreenState extends State<AiPhotoSearchScreen> {
                     onPressed: () {
                       // TODO: реализовать загрузку фото
                     },
-                    icon: const Icon(Icons.upload_file_rounded, color: Color(0xFFFF6EC7)),
+                    icon: const Icon(Icons.upload_file_rounded, color: Colors.white), // белая иконка
                     label: const Text(
                       'Загрузить фото',
                       style: TextStyle(
-                        fontFamily: 'SFProDisplay',
-                        fontWeight: FontWeight.w600,
+                        fontFamily: 'NauryzKeds', // SFProDisplay → NauryzKeds
+                        fontWeight: FontWeight.bold,
                         fontSize: 20,
-                        color: Color(0xFFFF6EC7),
+                        color: Colors.white, // белый текст
+                        letterSpacing: 1.1,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: const Color(0xFFFF6EC7),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
+                      backgroundColor: Colors.white.withOpacity(0.08), // прозрачность как на giveaway
+                      foregroundColor: Colors.white,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.zero, // острые углы
+                        side: BorderSide(color: Colors.white, width: 1.5), // белая окантовка
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 22),
+                      elevation: 0,
                     ),
                   ),
                 ],

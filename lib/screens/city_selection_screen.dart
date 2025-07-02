@@ -9,6 +9,16 @@ class CitySelectionScreen extends StatefulWidget {
   State<CitySelectionScreen> createState() => _CitySelectionScreenState();
 }
 
+class _CityPoint {
+  final String name;
+  final double dx;
+  final double dy;
+  final double size;
+  final String abbr;
+
+  _CityPoint(this.name, this.dx, this.dy, this.size, this.abbr);
+}
+
 class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTickerProviderStateMixin {
   String? _selectedCity;
   late final AnimationController _controller;
@@ -16,7 +26,7 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
   final List<_CityPoint> _cities = [
     _CityPoint('Москва', 0.5, 0.5, 155, 'MSC'),
     _CityPoint('Санкт-Петербург', 0.22, 0.23, 84, 'SPB'),
-    _CityPoint('Новосибирск', 0.5, 0.73, 54, 'NSK'), // ниже, на уровне ЕКБ
+    _CityPoint('Новосибирск', 0.5, 0.73, 54, 'NSK'),
     _CityPoint('Казань', 0.73, 0.60, 42, 'KAZ'),
     _CityPoint('Екатеринбург', 0.80, 0.73, 48, 'EKB'),
   ];
@@ -34,6 +44,21 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void navigateWithFade(BuildContext context, Widget page) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (_, __, ___) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 350),
+      ),
+    );
   }
 
   @override
@@ -56,7 +81,6 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
               color: Colors.black.withOpacity(0.18),
             ),
           ),
-          // Контент
           SafeArea(
             child: Column(
               children: [
@@ -70,7 +94,6 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
                   ),
                 ),
                 const SizedBox(height: 12),
-                // Карта с кругами-городами на весь экран (кроме кнопки)
                 Expanded(
                   child: Stack(
                     children: [
@@ -94,7 +117,6 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
                                       ? AnimatedBuilder(
                                           animation: _controller,
                                           builder: (context, child) {
-                                            // Размер CustomPaint больше круга на 2*stroke
                                             final double stroke = city.size / 13;
                                             final double paintSize = city.size + stroke * 2;
                                             return SizedBox(
@@ -125,7 +147,7 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
                                                         height: city.size,
                                                         child: Center(
                                                           child: Transform.translate(
-                                                            offset: Offset(0, city.size * 0.05), // Смещение вниз на 5% радиуса круга
+                                                            offset: Offset(0, city.size * 0.05),
                                                             child: Text(
                                                               city.abbr,
                                                               textAlign: TextAlign.center,
@@ -133,7 +155,7 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
                                                                 color: Colors.white,
                                                                 fontWeight: FontWeight.bold,
                                                                 fontSize: city.size / 2.2,
-                                                                fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
+                                                                fontFamily: 'NauryzKeds',
                                                                 letterSpacing: 1,
                                                                 height: 1,
                                                               ),
@@ -177,7 +199,7 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
                                               height: city.size + 18,
                                               child: Center(
                                                 child: Transform.translate(
-                                                  offset: Offset(0, city.size * 0.05), // Смещение вниз на 5% радиуса круга
+                                                  offset: Offset(0, city.size * 0.05),
                                                   child: Text(
                                                     city.abbr,
                                                     textAlign: TextAlign.center,
@@ -185,7 +207,7 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
                                                       color: Colors.white,
                                                       fontWeight: FontWeight.bold,
                                                       fontSize: city.size / 2.2,
-                                                      fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
+                                                      fontFamily: 'NauryzKeds',
                                                       letterSpacing: 1,
                                                       height: 1,
                                                     ),
@@ -209,22 +231,21 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
                                   ),
                               ],
                             ),
-                          );
-                        }).toList(),
+                          ),
+                        );
+                      }),
                     ],
                   ),
                 ),
-                // Кнопка "Далее" в самом низу, с белой окантовкой как в giveaway
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
                   child: GestureDetector(
                     onTap: _selectedCity == null
                         ? null
                         : () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => MasterCloudScreen(city: _selectedCity!),
-                              ),
+                            navigateWithFade(
+                              context,
+                              MasterCloudScreen(city: _selectedCity!),
                             );
                           },
                     child: AnimatedContainer(
@@ -274,16 +295,6 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
   }
 }
 
-class _CityPoint {
-  final String name;
-  final double dx;
-  final double dy;
-  final double size;
-  final String abbr;
-
-  _CityPoint(this.name, this.dx, this.dy, this.size, this.abbr);
-}
-
 class DottedCirclePainter extends CustomPainter {
   final Color color;
   final double circleSize;
@@ -297,7 +308,6 @@ class DottedCirclePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Длина штриха и пробела и толщина зависят от размера круга
     final double dashWidth = circleSize / 6;
     final double dashSpace = circleSize / 6;
     final double stroke = circleSize / 13;
@@ -314,7 +324,6 @@ class DottedCirclePainter extends CustomPainter {
     final circumference = 2 * pi * radius;
     double distance = 0;
 
-    // Анимация вращения пунктиров
     final double startRotation = 2 * pi * animationValue;
 
     while (distance < circumference) {

@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:slide_to_act/slide_to_act.dart';
 import 'giveaway_screen.dart';
+import '../main.dart'; // если main.dart в корне lib
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -49,7 +50,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     const Duration frameDuration = Duration(milliseconds: 16);
 
     void tick() {
-      if (!mounted) return; // <--- добавьте эту проверку!
+      if (!mounted) return;
       final double speed = baseSpeed + (_sliderProgress * maxAdditionalSpeed);
       _orbitAngle += speed;
       if (_orbitAngle > 2 * pi) {
@@ -85,92 +86,88 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: SingleChildScrollView( // Добавляем скролл для предотвращения overflow
+          child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(height: 8), // минимальный отступ сверху
-                // Объединяем все круги, анимированные мемодзи и центр в один контейнер
-                Container(
-                  // Можно добавить top margin/padding для управления позицией блока
-                  child: SizedBox(
-                    width: 320,
-                    height: 320,
-                    child: AnimatedBuilder(
-                      animation: _pulseController,
-                      builder: (context, _) {
-                        return Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            CustomPaint(
-                              size: const Size(320, 320),
-                              painter: DottedCirclePainter(),
-                            ),
-                            Transform.scale(
-                              scale: _pulseAnimation.value,
-                              child: Container(
-                                width: 224,
-                                height: 224,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: const Color(0xFFFF6EC7).withOpacity(0.4),
-                                ),
-                              ),
-                            ),
-                            Transform.scale(
-                              scale: _pulseAnimation.value,
-                              child: Container(
-                                width: 120,
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: const Color(0xFFFF6EC7).withOpacity(0.85),
-                                ),
-                              ),
-                            ),
-                            Container(
-                              width: 320,
-                              height: 320,
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: 320,
+                  height: 320,
+                  child: AnimatedBuilder(
+                    animation: _pulseController,
+                    builder: (context, _) {
+                      return Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CustomPaint(
+                            size: const Size(320, 320),
+                            painter: DottedCirclePainter(),
+                          ),
+                          Transform.scale(
+                            scale: _pulseAnimation.value,
+                            child: Container(
+                              width: 224,
+                              height: 224,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: const Color(0xFFFFB3E6).withOpacity(0.2),
+                                color: const Color(0xFFFF6EC7).withOpacity(0.4),
                               ),
                             ),
-                            for (int i = 0; i < 3; i++)
-                              Transform.translate(
-                                offset: calculateOrbitPosition(
-                                    _orbitAngle + (i * 2 * pi / 3), 160),
-                                child: framedMemoji(avatars[i]),
-                              ),
-                            for (int i = 0; i < 2; i++)
-                              Transform.translate(
-                                offset: calculateOrbitPosition(
-                                    -_orbitAngle + (i * pi), 112),
-                                child: framedMemoji(avatars[3 + i]),
-                              ),
-                            Transform.translate(
-                              offset: calculateOrbitPosition(_orbitAngle, 86),
-                              child: framedMemoji(avatars[5]),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.all(3),
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
+                          ),
+                          Transform.scale(
+                            scale: _pulseAnimation.value,
+                            child: Container(
+                              width: 120,
+                              height: 120,
+                              decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                              ),
-                              child: const CircleAvatar(
-                                radius: 36,
-                                backgroundImage: AssetImage('assets/center_memoji.png'),
-                                backgroundColor: Color(0xFF33272D),
+                                color: const Color(0xFFFF6EC7).withOpacity(0.85),
                               ),
                             ),
-                          ],
-                        );
-                      },
-                    ),
+                          ),
+                          Container(
+                            width: 320,
+                            height: 320,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(0xFFFFB3E6).withOpacity(0.2),
+                            ),
+                          ),
+                          for (int i = 0; i < 3; i++)
+                            Transform.translate(
+                              offset: calculateOrbitPosition(
+                                  _orbitAngle + (i * 2 * pi / 3), 160),
+                              child: framedMemoji(avatars[i]),
+                            ),
+                          for (int i = 0; i < 2; i++)
+                            Transform.translate(
+                              offset: calculateOrbitPosition(
+                                  -_orbitAngle + (i * pi), 112),
+                              child: framedMemoji(avatars[3 + i]),
+                            ),
+                          Transform.translate(
+                            offset: calculateOrbitPosition(_orbitAngle, 86),
+                            child: framedMemoji(avatars[5]),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const CircleAvatar(
+                              radius: 36,
+                              backgroundImage: AssetImage('assets/center_memoji.png'),
+                              backgroundColor: Color(0xFF33272D),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
-                const SizedBox(height: 32), // увеличили отступ после круга
+                const SizedBox(height: 32),
                 const Text(
                   'Fresh Style',
                   textAlign: TextAlign.center,
@@ -181,7 +178,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     fontFamily: 'NauryzKeds',
                   ),
                 ),
-                // Уменьшенный отступ между "Fresh Style" и "Russia" - теперь в 2 раза меньше
                 const SizedBox(height: 1),
                 const Text(
                   'Russia',
@@ -193,8 +189,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     fontFamily: 'NauryzKeds',
                   ),
                 ),
-                const SizedBox(height: 6), // уменьшили отступ в 2 раза
-
+                const SizedBox(height: 6),
                 const Text(
                   'Find smarter, connect faster with AI search!',
                   textAlign: TextAlign.center,
@@ -203,8 +198,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     color: Colors.white70,
                   ),
                 ),
-                const SizedBox(height: 16), // уменьшили отступ в 2 раза
-
+                const SizedBox(height: 16),
                 Listener(
                   onPointerMove: (event) {
                     final box = context.findRenderObject() as RenderBox;
@@ -229,9 +223,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     borderRadius: 50,
                     onSubmit: () {
                       Future.microtask(() {
-                        navigateWithFade(context, const GiveawayScreen());ayScreen());
+                        // Используем fade-переход
+                        navigateWithFadeReplacement(context, const GiveawayScreen());
                       });
-                      return null;rn null;
+                      return null;
                     },
                   ),
                 ),
@@ -243,47 +238,63 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     );
   }
 
-  Widget framedMemoji(String path) {idget framedMemoji(String path) {
-    return Container(    return Container(
-      padding: const EdgeInsets.all(2),2),
-      decoration: const BoxDecoration(st BoxDecoration(
+  Widget framedMemoji(String path) {
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: const BoxDecoration(
         color: Colors.white,
         shape: BoxShape.circle,
       ),
       child: CircleAvatar(
-        radius: 20,radius: 20,
-        backgroundImage: AssetImage(path),ssetImage(path),
-        backgroundColor: Colors.black, // фон внутри аватаров теперь чёрныйolor: Colors.black, // фон внутри аватаров теперь чёрный
+        radius: 20,
+        backgroundImage: AssetImage(path),
+        backgroundColor: Colors.black,
       ),
     );
   }
 }
 
-class DottedCirclePainter extends CustomPainter {lass DottedCirclePainter extends CustomPainter {
-  @override  @override
+// Исправленный DottedCirclePainter (без дублирования и ошибок)
+class DottedCirclePainter extends CustomPainter {
+  @override
   void paint(Canvas canvas, Size size) {
-    const double dashWidth = 5;ouble dashWidth = 5;
+    const double dashWidth = 5;
     const double dashSpace = 5;
     final paint = Paint()
       ..color = Colors.white
       ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;e.stroke;
+      ..style = PaintingStyle.stroke;
 
     final radius = size.width / 2;
-    final circumference = 2 * pi * radius;    final circumference = 2 * pi * radius;
-    final dashCount = circumference ~/ (dashWidth + dashSpace);e ~/ (dashWidth + dashSpace);
-    final adjustedDashAngle = 2 * pi / dashCount;hCount;
+    final circumference = 2 * pi * radius;
+    final dashCount = circumference ~/ (dashWidth + dashSpace);
+    final adjustedDashAngle = 2 * pi / dashCount;
 
     for (int i = 0; i < dashCount; i++) {
-      final startAngle = i * adjustedDashAngle;      final startAngle = i * adjustedDashAngle;
-      final x1 = radius + radius * cos(startAngle);artAngle);
-      final y1 = radius + radius * sin(startAngle);le);
-      final x2 = radius + radius * cos(startAngle + adjustedDashAngle / 2); adjustedDashAngle / 2);
-      final y2 = radius + radius * sin(startAngle + adjustedDashAngle / 2); adjustedDashAngle / 2);
+      final startAngle = i * adjustedDashAngle;
+      final x1 = radius + radius * cos(startAngle);
+      final y1 = radius + radius * sin(startAngle);
+      final x2 = radius + radius * cos(startAngle + adjustedDashAngle / 2);
+      final y2 = radius + radius * sin(startAngle + adjustedDashAngle / 2);
       canvas.drawLine(Offset(x1, y1), Offset(x2, y2), paint);
     }
   }
 
-  @overrideoverride
-  bool shouldRepaint(CustomPainter oldDelegate) => false;  bool shouldRepaint(CustomPainter oldDelegate) => false;
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+void navigateWithFadeReplacement(BuildContext context, Widget page) {
+  Navigator.of(context).pushReplacement(
+    PageRouteBuilder(
+      pageBuilder: (_, __, ___) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 350),
+    ),
+  );
 }

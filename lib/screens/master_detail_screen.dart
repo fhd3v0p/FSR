@@ -156,7 +156,7 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
-                                fontFamily: 'Lepka',
+                                fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -221,7 +221,7 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,
-                          fontFamily: 'Lepka',
+                          fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
                           fontWeight: FontWeight.bold,
                         ),
                       ),
