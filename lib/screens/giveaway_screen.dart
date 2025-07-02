@@ -90,24 +90,29 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
           // Контент поверх фона
           SafeArea(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const SizedBox(height: 32),
                 // Бокс для заголовка GIVEAWAY
                 Container(
+                  width: double.infinity,
                   alignment: Alignment.center,
                   child: Text(
                     'GIVEAWAY',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 54,
+                      fontSize: 42, // Уменьшен с 54 до 42
                       fontWeight: FontWeight.bold,
                       fontFamily: 'NauryzKeds',
                       letterSpacing: 2,
+                      height: 0.8, // Уменьшаем высоту строки для минимального отступа
                     ),
                   ),
                 ),
+                // Минимальный отступ между заголовком и таймером
+                const SizedBox(height: 4),
                 // Бокс для таймера
                 Container(
+                  width: double.infinity,
                   alignment: Alignment.center,
                   child: SizedBox(
                     height: 180,
@@ -121,6 +126,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                           fontWeight: FontWeight.w700,
                           letterSpacing: -2,
                           fontFamily: 'NauryzKeds',
+                          height: 0.9, // Уменьшаем высоту строки таймера
                         ),
                       ),
                     ),
