@@ -68,21 +68,21 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                   height: double.infinity,
                   fit: BoxFit.cover,
                 ),
-                // Уменьшаем giveaway_banner.png на 20% и центрируем
-                Center(
-                  child: Transform.scale(
-                    scale: 0.8, // уменьшение на 20%
-                    child: Image.asset(
-                      'assets/giveaway_banner.png',
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
+                // Мэйн баннер опущен вниз на 20% экрана
+                Positioned(
+                  top: MediaQuery.of(context).size.height * 0.20,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Image.asset(
+                    'assets/giveaway_banner.png',
+                    width: double.infinity,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
                   ),
                 ),
-                // Затемнение для читаемости текста (по желанию)
                 Container(
-                  color: Colors.black.withOpacity(0.15),
+                  color: Colors.black.withOpacity(0.25),
                 ),
               ],
             ),
@@ -90,50 +90,49 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
           // Контент поверх фона
           SafeArea(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 32),
-                // Бокс для заголовка GIVEAWAY
+                SizedBox(height: MediaQuery.of(context).size.height * 0.10), // 10% экрана отступ сверху
+                // Бокс для заголовка GIVEAWAY — максимально большой
                 Container(
-                  width: double.infinity,
                   alignment: Alignment.center,
-                  child: Text(
-                    'GIVEAWAY',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 42, // Уменьшен с 54 до 42
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'NauryzKeds',
-                      letterSpacing: 2,
-                      height: 0.8, // Уменьшаем высоту строки для минимального отступа
-                    ),
-                  ),
-                ),
-                // Минимальный отступ между заголовком и таймером
-                const SizedBox(height: 4),
-                // Бокс для таймера
-                Container(
-                  width: double.infinity,
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    height: 180,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        _formatDuration(_timeLeft),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 160,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -2,
-                          fontFamily: 'NauryzKeds',
-                          height: 0.9, // Уменьшаем высоту строки таймера
-                        ),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'GIVEAWAY',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 120,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'NauryzKeds',
+                        letterSpacing: 2,
+                        height: 1,
                       ),
                     ),
                   ),
                 ),
-                const Spacer(),
-                // Список заданий
+                const SizedBox(height: 8), // минимальный отступ между GIVEAWAY и таймером
+                // Бокс для таймера — максимально большой
+                Container(
+                  alignment: Alignment.center,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      _formatDuration(_timeLeft),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 220,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -2,
+                        fontFamily: 'NauryzKeds',
+                        height: 0.9,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8), // минимальный отступ до следующего блока
+                const Spacer(), // Всё что ниже таймера — уходит вниз
+                // Список заданий и кнопка
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
                   child: Column(
