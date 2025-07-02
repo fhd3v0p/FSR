@@ -31,6 +31,7 @@ flutter:
     - assets/giveaway_banner.png
     - assets/master_detail_banner.png
     - assets/master_cloud_banner.png
+    - assets/master_cloud_banner1.png
     - assets/role_selection_banner.png
     - assets/city_selection_banner.png
     - assets/main_banner.png
@@ -42,6 +43,8 @@ flutter:
     - assets/m6.png
     - assets/work1.png
     - assets/work2.png
+    - assets/master_detail_back_banner.png
+    - assets/master_detail_logo_banner.png
 
   fonts:
     - family: OpenSans

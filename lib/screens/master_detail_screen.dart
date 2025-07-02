@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/master_model.dart';
-import '../widgets/master_gallery_carousel.dart';
 
 class MasterDetailScreen extends StatefulWidget {
   final MasterModel master;
@@ -11,7 +10,7 @@ class MasterDetailScreen extends StatefulWidget {
 }
 
 class _MasterDetailScreenState extends State<MasterDetailScreen> {
-  int? _galleryIndex; // null - обычный режим, >=0 - режим просмотра фото
+  int? _galleryIndex;
 
   void _openGallery(int index) {
     setState(() {
@@ -48,99 +47,136 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
+          // --- ФОН: master_detail_back_banner ---
           Positioned.fill(
             child: Image.asset(
-              'assets/master_detail_banner.png',
+              'assets/master_detail_back_banner.png',
               fit: BoxFit.cover,
             ),
           ),
+          // --- ЗАТЕМНЕНИЕ 10% ПОД ЛОГО, НО НАД ФОНОМ ---
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.18),
+              color: Colors.black.withOpacity(0.10),
             ),
           ),
-          // Контент поверх фона
+          // --- ЛОГО БАННЕР: master_detail_logo_banner ---
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Image.asset(
+              'assets/master_detail_logo_banner.png',
+              fit: BoxFit.fitWidth,
+              alignment: Alignment.topCenter,
+            ),
+          ),
+          // --- КОНТЕНТ (dark boxes) ---
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Кнопка назад
+                // --- КНОПКА НАЗАД ---
                 Padding(
-                  padding: const EdgeInsets.only(left: 8, top: 8, right: 0),
+                  padding: const EdgeInsets.only(left: 8, top: 8, bottom: 4),
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFFFF6EC7)),
-                    onPressed: () => Navigator.of(context).maybePop(),
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28),
+                    onPressed: () => Navigator.of(context).pop(),
                     splashRadius: 24,
                   ),
                 ),
-                // Бокс с инфо о мастере
-                Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 16, right: 16, left: 0, bottom: 0),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.13),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.white.withOpacity(0.7), width: 2),
-                    ),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundImage: AssetImage(master.avatar),
-                          radius: 44,
-                          backgroundColor: Colors.transparent,
+                // --- ВЕРХНЯЯ ТЁМНАЯ РАМКА с соцсетями и кнопкой ---
+                Container(
+                  margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.65),
+                    borderRadius: BorderRadius.zero, // острые углы
+                    // border убран
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundImage: AssetImage(master.avatar),
+                        radius: 38,
+                        backgroundColor: Colors.transparent,
+                      ),
+                      const SizedBox(width: 18),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              master.name,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'NauryzKeds',
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.telegram, color: Color(0xFFFF6EC7), size: 20),
+                                const SizedBox(width: 6),
+                                Text(master.telegram, style: const TextStyle(color: Colors.white70, fontFamily: 'NauryzKeds')),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                const Icon(Icons.camera_alt_outlined, color: Color(0xFFFF6EC7), size: 20),
+                                const SizedBox(width: 6),
+                                Text(master.instagram, style: const TextStyle(color: Colors.white70, fontFamily: 'NauryzKeds')),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                const Icon(Icons.music_note, color: Color(0xFFFF6EC7), size: 20),
+                                const SizedBox(width: 6),
+                                Text(master.tiktok, style: const TextStyle(color: Colors.white70, fontFamily: 'NauryzKeds')),
+                              ],
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 20),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                master.name,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  const Icon(Icons.telegram, color: Color(0xFFFF6EC7), size: 20),
-                                  const SizedBox(width: 6),
-                                  Text(master.telegram, style: const TextStyle(color: Colors.white70, fontFamily: 'SFProDisplay')),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  const Icon(Icons.camera_alt_outlined, color: Color(0xFFFF6EC7), size: 20),
-                                  const SizedBox(width: 6),
-                                  Text(master.instagram, style: const TextStyle(color: Colors.white70, fontFamily: 'SFProDisplay')),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  const Icon(Icons.music_note, color: Color(0xFFFF6EC7), size: 20),
-                                  const SizedBox(width: 6),
-                                  Text(master.tiktok, style: const TextStyle(color: Colors.white70, fontFamily: 'SFProDisplay')),
-                                ],
-                              ),
-                            ],
+                      ),
+                      const SizedBox(width: 12),
+                      ElevatedButton(
+                        onPressed: () {
+                          // TODO: обработчик записи
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero, // острые углы
+                            side: const BorderSide(color: Color(0xFFFF6EC7), width: 1.5),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                        ),
+                        child: const Text(
+                          'Записаться',
+                          style: TextStyle(
+                            fontFamily: 'NauryzKeds',
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            letterSpacing: 1.1,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 24),
-                // Категория Location
+                // --- ЛОКАЦИЯ ---
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
-                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.black.withOpacity(0.65),
+                    borderRadius: BorderRadius.zero,
+                    // border убран
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,7 +192,7 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
-                                fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
+                                fontFamily: 'NauryzKeds',
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -168,7 +204,7 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
-                                fontFamily: 'SFProDisplay',
+                                fontFamily: 'NauryzKeds',
                               ),
                             ),
                           ],
@@ -178,17 +214,18 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                // Календарик (soon)
+                // --- КАЛЕНДАРЬ ---
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.6),
-                    borderRadius: BorderRadius.circular(20),
+                    color: Colors.black.withOpacity(0.65),
+                    borderRadius: BorderRadius.zero,
+                    // border убран
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.calendar_month, color: Color(0xFFFF6EC7), size: 28),
+                      const Icon(Icons.calendar_month, color: Color(0xFFFF6EC7), size: 28),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -196,7 +233,7 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.5),
                             fontSize: 16,
-                            fontFamily: 'SFProDisplay',
+                            fontFamily: 'NauryzKeds',
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -205,13 +242,14 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 32),
-                // Галерея работ с темным полупрозрачным фоном и каруселью
+                // --- ГАЛЕРЕЯ ---
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.65),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.zero,
+                    // border убран
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,12 +259,11 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,
-                          fontFamily: 'NauryzKeds', // заменили Lepka на NauryzKeds
+                          fontFamily: 'NauryzKeds',
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 12),
-                      // Карусель с фото работ
                       SizedBox(
                         height: 120,
                         child: ListView.separated(
@@ -237,7 +274,7 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                             return GestureDetector(
                               onTap: () => _openGallery(i),
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(0),
                                 child: Image.asset(
                                   master.gallery[i],
                                   width: 120,
@@ -259,7 +296,7 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
           if (_galleryIndex != null)
             Positioned.fill(
               child: Container(
-                color: Colors.black.withOpacity(0.18), // или 0.25, как на giveaway_screen
+                color: Colors.black.withOpacity(0.18),
               ),
             ),
           if (_galleryIndex != null)
@@ -268,7 +305,6 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                 color: Colors.black.withOpacity(0.92),
                 child: Stack(
                   children: [
-                    // Фото по центру
                     Center(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(18),
@@ -280,7 +316,6 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                         ),
                       ),
                     ),
-                    // Кнопка закрыть (крестик)
                     Positioned(
                       top: 32,
                       right: 24,
@@ -290,7 +325,6 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                         splashRadius: 28,
                       ),
                     ),
-                    // Стрелка влево
                     if (_galleryIndex! > 0)
                       Positioned(
                         left: 12,
@@ -304,7 +338,6 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                           ),
                         ),
                       ),
-                    // Стрелка вправо
                     if (_galleryIndex! < master.gallery.length - 1)
                       Positioned(
                         right: 12,

@@ -96,145 +96,128 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
                 const SizedBox(height: 12),
                 Expanded(
                   child: Stack(
-                    children: [
-                      ..._cities.map((city) {
-                        final selected = _selectedCity == city.name;
-                        final bool dimmed = _selectedCity != null && !selected;
-                        return Positioned(
-                          left: city.dx * width - city.size / 2,
-                          top: city.dy * (height - 120) - city.size / 2,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedCity = city.name;
-                              });
-                            },
-                            child: Column(
-                              children: [
-                                Opacity(
-                                  opacity: dimmed ? 0.18 : 1,
-                                  child: !selected
-                                      ? AnimatedBuilder(
-                                          animation: _controller,
-                                          builder: (context, child) {
-                                            final double stroke = city.size / 13;
-                                            final double paintSize = city.size + stroke * 2;
-                                            return SizedBox(
-                                              width: paintSize,
-                                              height: paintSize,
-                                              child: CustomPaint(
-                                                painter: DottedCirclePainter(
-                                                  color: Colors.white.withOpacity(0.85),
-                                                  circleSize: city.size,
-                                                  animationValue: _controller.value,
-                                                ),
-                                                child: Center(
-                                                  child: AnimatedContainer(
-                                                    duration: const Duration(milliseconds: 180),
-                                                    width: city.size,
-                                                    height: city.size,
-                                                    decoration: BoxDecoration(
-                                                      gradient: const LinearGradient(
-                                                        colors: [Color(0xFFFF6EC7), Color(0xFFFFB3E6)],
-                                                        begin: Alignment.topLeft,
-                                                        end: Alignment.bottomRight,
-                                                      ),
-                                                      shape: BoxShape.circle,
+                    children: _cities.map((city) {
+                      final double citySize = city.size * 1.15;
+                      final selected = _selectedCity == city.name;
+                      final bool dimmed = _selectedCity != null && !selected;
+                      return Positioned(
+                        left: city.dx * width - citySize / 2,
+                        top: city.dy * (height - 120) - citySize / 2,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedCity = city.name;
+                            });
+                          },
+                          child: Column(
+                            children: [
+                              Opacity(
+                                opacity: dimmed ? 0.18 : 1,
+                                child: !selected
+                                    ? AnimatedBuilder(
+                                        animation: _controller,
+                                        builder: (context, child) {
+                                          final double stroke = citySize / 13;
+                                          final double paintSize = citySize + stroke * 2;
+                                          return SizedBox(
+                                            width: paintSize,
+                                            height: paintSize,
+                                            child: CustomPaint(
+                                              painter: DottedCirclePainter(
+                                                color: Colors.white.withOpacity(0.85),
+                                                circleSize: citySize,
+                                                animationValue: _controller.value,
+                                              ),
+                                              child: Center(
+                                                child: AnimatedContainer(
+                                                  duration: const Duration(milliseconds: 180),
+                                                  width: citySize,
+                                                  height: citySize,
+                                                  decoration: BoxDecoration(
+                                                    gradient: const LinearGradient(
+                                                      colors: [Color(0xFFFF6EC7), Color(0xFFFFB3E6)],
+                                                      begin: Alignment.topLeft,
+                                                      end: Alignment.bottomRight,
                                                     ),
-                                                    child: Center(
-                                                      child: SizedBox(
-                                                        width: city.size,
-                                                        height: city.size,
-                                                        child: Center(
-                                                          child: Transform.translate(
-                                                            offset: Offset(0, city.size * 0.05),
-                                                            child: Text(
-                                                              city.abbr,
-                                                              textAlign: TextAlign.center,
-                                                              style: TextStyle(
-                                                                color: Colors.white,
-                                                                fontWeight: FontWeight.bold,
-                                                                fontSize: city.size / 2.2,
-                                                                fontFamily: 'NauryzKeds',
-                                                                letterSpacing: 1,
-                                                                height: 1,
-                                                              ),
-                                                            ),
-                                                          ),
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: Center(
+                                                    child: Transform.translate(
+                                                      offset: Offset(0, citySize * 0.05),
+                                                      child: Text(
+                                                        city.abbr,
+                                                        textAlign: TextAlign.center,
+                                                        style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight: FontWeight.bold,
+                                                          fontSize: citySize / 2.2,
+                                                          fontFamily: 'NauryzKeds',
+                                                          letterSpacing: 1,
+                                                          height: 1,
                                                         ),
                                                       ),
                                                     ),
                                                   ),
                                                 ),
                                               ),
-                                            );
-                                          },
-                                        )
-                                      : AnimatedContainer(
-                                          duration: const Duration(milliseconds: 180),
-                                          width: city.size + 18,
-                                          height: city.size + 18,
-                                          decoration: BoxDecoration(
-                                            gradient: const LinearGradient(
-                                              colors: [Color(0xFFDE3DF6), Color(0xFF7B1FF6)],
-                                              begin: Alignment.topLeft,
-                                              end: Alignment.bottomRight,
                                             ),
-                                            shape: BoxShape.circle,
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: const Color(0xFFDE3DF6).withOpacity(0.25),
-                                                blurRadius: 18,
-                                                spreadRadius: 4,
-                                              )
-                                            ],
-                                            border: Border.all(
-                                              color: Colors.white.withOpacity(0.95),
-                                              width: 5,
-                                            ),
+                                          );
+                                        },
+                                      )
+                                    : AnimatedContainer(
+                                        duration: const Duration(milliseconds: 180),
+                                        width: citySize + 18,
+                                        height: citySize + 18,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white, // как у активной кнопки "Далее"
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: const Color(0xFFFF6EC7), // розовая окантовка как у активной кнопки
+                                            width: 5,
                                           ),
-                                          child: Center(
-                                            child: SizedBox(
-                                              width: city.size + 18,
-                                              height: city.size + 18,
-                                              child: Center(
-                                                child: Transform.translate(
-                                                  offset: Offset(0, city.size * 0.05),
-                                                  child: Text(
-                                                    city.abbr,
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontWeight: FontWeight.bold,
-                                                      fontSize: city.size / 2.2,
-                                                      fontFamily: 'NauryzKeds',
-                                                      letterSpacing: 1,
-                                                      height: 1,
-                                                    ),
-                                                  ),
-                                                ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFFFF6EC7).withOpacity(0.15),
+                                              blurRadius: 18,
+                                              spreadRadius: 4,
+                                            )
+                                          ],
+                                        ),
+                                        child: Center(
+                                          child: Transform.translate(
+                                            offset: Offset(0, citySize * 0.05),
+                                            child: Text(
+                                              city.abbr,
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                color: Colors.black, // как у активной кнопки "Далее"
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: citySize / 2.2,
+                                                fontFamily: 'NauryzKeds',
+                                                letterSpacing: 1,
+                                                height: 1,
                                               ),
                                             ),
                                           ),
                                         ),
-                                ),
-                                const SizedBox(height: 8),
-                                if (selected)
-                                  Text(
-                                    city.name,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
-                                      fontFamily: 'SFProDisplay',
-                                    ),
+                                      ),
+                              ),
+                              const SizedBox(height: 8),
+                              if (selected)
+                                Text(
+                                  city.name,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'NauryzKeds',
                                   ),
-                              ],
-                            ),
+                                ),
+                            ],
                           ),
-                        );
-                      }),
-                    ],
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
                 Padding(
@@ -253,20 +236,15 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
                       width: double.infinity,
                       height: 56,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(18),
-                        gradient: _selectedCity != null
-                            ? const LinearGradient(
-                                colors: [Color(0xFFDE3DF6), Color(0xFF7B1FF6)],
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                              )
-                            : null,
-                        color: _selectedCity == null
-                            ? Colors.white.withOpacity(0.08)
-                            : null,
+                        borderRadius: BorderRadius.zero, // острые углы
+                        color: _selectedCity != null
+                            ? Colors.white // выбран — белый фон
+                            : Colors.white.withOpacity(0.08), // не выбран — прозрачный
                         border: Border.all(
-                          color: Colors.white,
-                          width: 1,
+                          color: _selectedCity != null
+                              ? const Color(0xFFFF6EC7) // выбран — розовая окантовка
+                              : Colors.white, // не выбран — белая окантовка
+                          width: 1.5,
                         ),
                       ),
                       child: Center(
@@ -274,11 +252,11 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
                           'Далее',
                           style: TextStyle(
                             color: _selectedCity != null
-                                ? Colors.white
-                                : Colors.white.withOpacity(0.5),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            fontFamily: 'SFProDisplay',
+                                ? Colors.black // выбран — чёрный текст
+                                : Colors.white.withOpacity(0.5), // не выбран — белый полупрозрачный
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'NauryzKeds',
                             letterSpacing: 1.2,
                           ),
                         ),
