@@ -142,7 +142,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                         subtitle: '10 каналов одним кликом\n+1000 XP',
                         icon: Icons.folder_special,
                         onTap: () async {
-                          const url = 'https://t.me/addlist/IcPQxDiYrwU3Mjgy';
+                          const url = 'https://t.me/addlist/f3YaeLmoNsdkYjVl';
                           if (await canLaunchUrl(Uri.parse(url))) {
                             await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
                           }

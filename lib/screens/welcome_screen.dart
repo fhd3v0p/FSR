@@ -90,7 +90,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(height: 8),
+                const SizedBox(height: 5), // отступ сверху 5мм
                 SizedBox(
                   width: 320,
                   height: 320,
@@ -172,33 +172,34 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                   'Fresh Style',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 74,
+                    fontSize: 37, // уменьшено в 2 раза с 74
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                     fontFamily: 'NauryzKeds',
                   ),
                 ),
-                const SizedBox(height: 1),
+                const SizedBox(height: 0.25), // уменьшено в 4 раза с 1
                 const Text(
                   'Russia',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 74,
+                    fontSize: 37, // уменьшено в 2 раза с 74
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                     fontFamily: 'NauryzKeds',
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 1.5), // уменьшено в 4 раза с 6
                 const Text(
                   'Find smarter, connect faster with AI search!',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 16, // уменьшено с 20 для более тонкого вида
                     color: Colors.white70,
+                    fontWeight: FontWeight.w300, // тонкий шрифт
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 5), // отступ снизу до слайдера 5мм
                 Listener(
                   onPointerMove: (event) {
                     final box = context.findRenderObject() as RenderBox;
@@ -230,6 +231,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     },
                   ),
                 ),
+                const SizedBox(height: 5), // отступ снизу от края до нижней границы слайдера 5мм
               ],
             ),
           ),
