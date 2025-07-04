@@ -246,6 +246,48 @@ def health_check():
     """Health check endpoint"""
     return jsonify({'status': 'healthy'}), 200
 
+@app.route('/api/referral/<user_id>', methods=['GET'])
+def get_referral_info(user_id):
+    """Получение реферальной информации пользователя"""
+    try:
+        from database import Database
+        db = Database()
+        ref_info = db.get_user_referral_info(int(user_id))
+        if ref_info:
+            return jsonify(ref_info)
+        else:
+            return jsonify({'error': 'User not found'}), 404
+    except Exception as e:
+        logger.error(f"Error getting referral info: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/giveaway/prizes', methods=['GET'])
+def get_giveaway_prizes():
+    """Получение списка подарков гивевея"""
+    try:
+        from database import Database
+        db = Database()
+        prizes = db.get_giveaway_prizes()
+        return jsonify(prizes)
+    except Exception as e:
+        logger.error(f"Error getting giveaway prizes: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/user/<user_id>/stats', methods=['GET'])
+def get_user_stats(user_id):
+    """Получение статистики пользователя"""
+    try:
+        from database import Database
+        db = Database()
+        stats = db.get_user_stats(int(user_id))
+        if stats:
+            return jsonify(stats)
+        else:
+            return jsonify({'error': 'User not found'}), 404
+    except Exception as e:
+        logger.error(f"Error getting user stats: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
 if __name__ == '__main__':
     # Инициализируем таблицу при запуске
     init_photo_uploads_table()

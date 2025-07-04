@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'role_selection_screen.dart';
+import 'invite_friends_screen.dart';
 import 'dart:async';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -48,6 +49,86 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
   String _formatDuration(Duration d) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     return "${d.inHours.remainder(24)}:${twoDigits(d.inMinutes.remainder(60))}:${twoDigits(d.inSeconds.remainder(60))}";
+  }
+
+  void _showPrizesDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.black87,
+        title: const Text(
+          '🎁 Подарки гивевея',
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: 'NauryzKeds',
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _PrizeCard(
+                title: 'Сертификат в ZARA',
+                description: 'Сертификат на покупки в ZARA на сумму 20,000 рублей',
+                value: '20,000₽',
+                icon: Icons.shopping_bag,
+                color: Colors.blue,
+              ),
+              const SizedBox(height: 16),
+              _PrizeCard(
+                title: 'Бьюти-услуги',
+                description: 'Комплекс бьюти-услуг на сумму 100,000 рублей (маникюр, педикюр, окрашивание, стрижка, макияж)',
+                value: '100,000₽',
+                icon: Icons.face,
+                color: Colors.pink,
+              ),
+              const SizedBox(height: 16),
+              _PrizeCard(
+                title: 'VIP-статус',
+                description: 'Приоритетный доступ к новым артистам и эксклюзивным предложениям',
+                value: '50,000₽',
+                icon: Icons.star,
+                color: Colors.amber,
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF6EC7).withOpacity(0.2),
+                  border: Border.all(color: const Color(0xFFFF6EC7)),
+                ),
+                child: const Text(
+                  '🏆 Общая стоимость призов: 170,000₽',
+                  style: TextStyle(
+                    color: Color(0xFFFF6EC7),
+                    fontFamily: 'NauryzKeds',
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'Закрыть',
+              style: TextStyle(
+                color: Color(0xFFFF6EC7),
+                fontFamily: 'NauryzKeds',
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -132,6 +213,39 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                 ),
                 const SizedBox(height: 8), // минимальный отступ до следующего блока
                 const Spacer(), // Всё что ниже таймера — уходит вниз
+                // Кнопка "Подарки"
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: GestureDetector(
+                    onTap: () {
+                      _showPrizesDialog();
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF6EC7).withOpacity(0.2),
+                        border: Border.all(color: const Color(0xFFFF6EC7), width: 2),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.card_giftcard, color: Color(0xFFFF6EC7), size: 24),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Подарки',
+                            style: TextStyle(
+                              color: Color(0xFFFF6EC7),
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'NauryzKeds',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
                 // Список заданий и кнопка
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
@@ -157,6 +271,12 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                         subtitle: 'За каждого друга: +100 XP',
                         icon: Icons.person_add_alt_1,
                         onTap: () {
+                          // Открываем экран приглашения друзей
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const InviteFriendsScreen(),
+                            ),
+                          );
                           setState(() {
                             _task2Done = true;
                           });
@@ -170,23 +290,21 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                   padding: const EdgeInsets.all(16),
                   child: GradientButton(
                     text: 'Перейти в приложение',
-                    onTap: allTasksDone
-                        ? () {
-                            Navigator.of(context).pushReplacement(
-                              PageRouteBuilder(
-                                pageBuilder: (_, __, ___) => const RoleSelectionScreen(),
-                                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                  return FadeTransition(
-                                    opacity: animation,
-                                    child: child,
-                                  );
-                                },
-                                transitionDuration: const Duration(milliseconds: 350),
-                              ),
+                    onTap: () {
+                      Navigator.of(context).pushReplacement(
+                        PageRouteBuilder(
+                          pageBuilder: (_, __, ___) => const RoleSelectionScreen(),
+                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: child,
                             );
-                          }
-                        : null,
-                    enabled: allTasksDone,
+                          },
+                          transitionDuration: const Duration(milliseconds: 350),
+                        ),
+                      );
+                    },
+                    enabled: true, // Всегда активна для тестирования
                   ),
                 ),
               ],
@@ -331,6 +449,87 @@ class GradientButton extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _PrizeCard extends StatelessWidget {
+  final String title;
+  final String description;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const _PrizeCard({
+    required this.title,
+    required this.description,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        border: Border.all(color: color.withOpacity(0.5)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'NauryzKeds',
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontFamily: 'NauryzKeds',
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              border: Border.all(color: color),
+            ),
+            child: Text(
+              value,
+              style: TextStyle(
+                color: color,
+                fontFamily: 'NauryzKeds',
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

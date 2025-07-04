@@ -18,24 +18,98 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Fresh Style Russia - AI поиск артистов">
+
+  <!-- Кэш-контроль для Telegram Web App -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
+  <!-- Версия приложения для принудительного обновления -->
+  <meta name="app-version" content="1.0.1">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="myapp1">
+  <meta name="apple-mobile-web-app-title" content="FSR">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <!-- Подключаем Telegram Web App JS -->
-  <script src="https://telegram.org/js/telegram-web-app.js?57"></script>
+  <!-- Подключаем Telegram Web App JS с версионированием -->
+  <script src="https://telegram.org/js/telegram-web-app.js?v=1.0.1"></script>
 
-  <title>myapp1</title>
+  <title>Fresh Style Russia</title>
   <link rel="manifest" href="manifest.json">
+  
+  <style>
+    /* Принудительное обновление кэша */
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    
+    /* Скрываем загрузочный экран после загрузки */
+    .loading {
+      display: none;
+    }
+  </style>
 </head>
 <body>
+  <!-- Загрузочный экран -->
+  <div id="loading" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #8E5BBE 0%, #FF6EC7 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  ">
+    <div style="text-align: center; color: white;">
+      <h1 style="font-family: 'NauryzKeds', sans-serif; margin-bottom: 20px;">Fresh Style Russia</h1>
+      <div style="width: 40px; height: 40px; border: 3px solid white; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+    </div>
+  </div>
+  
+  <style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+
+  <script>
+    // Принудительное обновление кэша
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+    
+    // Очистка кэша
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        for (let name of names) {
+          caches.delete(name);
+        }
+      });
+    }
+    
+    // Скрываем загрузочный экран после загрузки Flutter
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        document.getElementById('loading').style.display = 'none';
+      }, 2000);
+    });
+  </script>
+  
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

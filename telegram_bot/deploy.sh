@@ -1,96 +1,107 @@
 #!/bin/bash
 
-# Скрипт развертывания FSR API сервера
-echo "🚀 Начинаем развертывание FSR API сервера..."
+# FSR Deployment Script
+# Быстрое развертывание обновлений на сервере
 
-# Обновляем зависимости
-echo "📦 Обновляем зависимости..."
-pip install -r requirements.txt
+set -e
 
-# Создаем резервную копию текущей nginx конфигурации
-echo "💾 Создаем резервную копию nginx конфигурации..."
-cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.backup.$(date +%Y%m%d_%H%M%S)
+echo "🚀 FSR Deployment Script"
+echo "=========================="
 
-# Обновляем nginx конфигурацию
-echo "⚙️ Обновляем nginx конфигурацию..."
-cp nginx_fsr_agency.conf /tmp/nginx_fsr_agency.conf
-
-# Заменяем секцию fsr.agency в default конфигурации
-sed -i '/server_name www.fsr.agency fsr.agency/,/^}/c\
-    server {\
-        root /var/www/html;\
-        index index.html index.htm index.nginx-debian.html;\
-        server_name www.fsr.agency fsr.agency;\
-        location /api/ {\
-            proxy_pass http://127.0.0.1:5000;\
-            proxy_set_header Host $host;\
-            proxy_set_header X-Real-IP $remote_addr;\
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\
-            proxy_set_header X-Forwarded-Proto $scheme;\
-            proxy_connect_timeout 60s;\
-            proxy_send_timeout 60s;\
-            proxy_read_timeout 60s;\
-            proxy_request_buffering off;\
-            client_max_body_size 10M;\
-        }\
-        location /health {\
-            proxy_pass http://127.0.0.1:5000;\
-            proxy_set_header Host $host;\
-            proxy_set_header X-Real-IP $remote_addr;\
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\
-            proxy_set_header X-Forwarded-Proto $scheme;\
-        }\
-        location / {\
-            try_files $uri $uri/ =404;\
-        }\
-        listen [::]:443 ssl;\
-        listen 443 ssl;\
-        ssl_certificate /etc/letsencrypt/live/fsr.agency/fullchain.pem;\
-        ssl_certificate_key /etc/letsencrypt/live/fsr.agency/privkey.pem;\
-        include /etc/letsencrypt/options-ssl-nginx.conf;\
-        ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;\
-    }' /etc/nginx/sites-available/default
-
-# Проверяем конфигурацию nginx
-echo "🔍 Проверяем конфигурацию nginx..."
-nginx -t
-
-if [ $? -eq 0 ]; then
-    echo "✅ Конфигурация nginx корректна"
+# Проверяем аргументы
+if [ "$1" = "bot" ]; then
+    echo "📦 Развертывание Telegram Bot..."
     
-    # Перезапускаем nginx
-    echo "🔄 Перезапускаем nginx..."
-    systemctl reload nginx
+    # Останавливаем сервисы
+    echo "⏹️ Останавливаем сервисы..."
+    systemctl stop fsr-bot fsr-api
     
-    # Копируем systemd сервис
-    echo "📋 Копируем systemd сервис..."
-    cp fsr-api.service /etc/systemd/system/
+    # Обновляем код (если используется git)
+    if [ -d ".git" ]; then
+        echo "📥 Обновляем код из git..."
+        git pull
+    fi
     
-    # Перезагружаем systemd
-    echo "🔄 Перезагружаем systemd..."
-    systemctl daemon-reload
+    # Устанавливаем зависимости
+    echo "📦 Обновляем зависимости..."
+    pip3 install -r requirements.txt
     
-    # Останавливаем старый сервис если запущен
-    echo "🛑 Останавливаем старый API сервис..."
-    systemctl stop fsr-api 2>/dev/null || true
-    
-    # Запускаем новый сервис
-    echo "🚀 Запускаем API сервис..."
-    systemctl enable fsr-api
-    systemctl start fsr-api
+    # Перезапускаем сервисы
+    echo "▶️ Запускаем сервисы..."
+    systemctl start fsr-bot fsr-api
     
     # Проверяем статус
-    echo "📊 Проверяем статус сервисов..."
-    systemctl status fsr-api --no-pager -l
-    systemctl status nginx --no-pager -l
+    echo "🔍 Проверяем статус..."
+    sleep 5
+    systemctl status fsr-bot fsr-api --no-pager -l
     
-    echo "🎉 Развертывание завершено!"
-    echo "🌐 API доступен по адресу: https://fsr.agency/api/"
-    echo "💚 Health check: https://fsr.agency/health"
+    echo "✅ Telegram Bot развернут!"
+
+elif [ "$1" = "web" ]; then
+    echo "🌐 Развертывание Flutter Web App..."
     
+    # Проверяем, что Flutter установлен
+    if ! command -v flutter &> /dev/null; then
+        echo "❌ Flutter не установлен. Установите Flutter и повторите."
+        exit 1
+    fi
+    
+    # Собираем приложение
+    echo "🔨 Собираем Flutter Web App..."
+    flutter build web --release
+    
+    # Копируем на сервер
+    echo "📤 Копируем на сервер..."
+    scp -r build/web/* root@46.203.233.218:/var/www/html/
+    
+    echo "✅ Flutter Web App развернут!"
+
+elif [ "$1" = "full" ]; then
+    echo "🔄 Полное развертывание системы..."
+    
+    # Развертываем бота
+    $0 bot
+    
+    # Развертываем веб-приложение
+    $0 web
+    
+    # Проверяем здоровье системы
+    echo "🏥 Проверяем здоровье системы..."
+    ssh root@46.203.233.218 "cd /root/telegram_bot && python3 health_check.py"
+    
+    echo "✅ Полное развертывание завершено!"
+
+elif [ "$1" = "monitor" ]; then
+    echo "📊 Запуск мониторинга..."
+    ssh root@46.203.233.218 "cd /root/telegram_bot && python3 system_monitor.py"
+
+elif [ "$1" = "logs" ]; then
+    echo "📋 Просмотр логов..."
+    ssh root@46.203.233.218 "tail -f /root/telegram_bot/system_monitor.log"
+
+elif [ "$1" = "status" ]; then
+    echo "📊 Статус сервисов..."
+    ssh root@46.203.233.218 "systemctl status fsr-bot fsr-api nginx --no-pager -l"
+
+elif [ "$1" = "restart" ]; then
+    echo "🔄 Перезапуск всех сервисов..."
+    ssh root@46.203.233.218 "systemctl restart fsr-bot fsr-api nginx"
+    echo "✅ Сервисы перезапущены!"
+
 else
-    echo "❌ Ошибка в конфигурации nginx!"
-    echo "Восстанавливаем резервную копию..."
-    cp /etc/nginx/sites-available/default.backup.* /etc/nginx/sites-available/default
-    exit 1
+    echo "❌ Неизвестная команда: $1"
+    echo ""
+    echo "📖 Использование:"
+    echo "  $0 bot     - Развернуть только Telegram Bot"
+    echo "  $0 web     - Развернуть только Flutter Web App"
+    echo "  $0 full    - Полное развертывание системы"
+    echo "  $0 monitor - Запустить мониторинг"
+    echo "  $0 logs    - Просмотр логов"
+    echo "  $0 status  - Статус сервисов"
+    echo "  $0 restart - Перезапуск всех сервисов"
+    echo ""
+    echo "💡 Примеры:"
+    echo "  $0 bot     # Обновить только бота"
+    echo "  $0 full    # Обновить всю систему"
+    echo "  $0 status  # Проверить статус"
 fi 

@@ -48,24 +48,16 @@ class TelegramWebAppService {
     return userData?['id']?.toString();
   }
 
-  // Загружаем фото через Telegram Web App API
+  // Загружаем фото через HTML5 File API
   static Future<PhotoUploadModel?> uploadPhoto({
     required String category,
     String? description,
   }) async {
-    if (!isTelegramWebApp) {
-      throw Exception('Not running in Telegram Web App');
-    }
-
     try {
-      final webApp = js.context['Telegram']['WebApp'];
-      final userId = getUserId();
-      
-      if (userId == null) {
-        throw Exception('User ID not available');
-      }
+      // Генерируем временный ID пользователя если не в Telegram
+      final userId = getUserId() ?? 'web_user_${DateTime.now().millisecondsSinceEpoch}';
 
-      // Вызываем Telegram Web App API для выбора файла
+      // Вызываем HTML5 File API для выбора файла
       final result = await _selectFile();
       
       if (result == null) {
@@ -100,12 +92,9 @@ class TelegramWebAppService {
     }
   }
 
-  // Выбор файла через Telegram Web App API
+  // Выбор файла через HTML5 File API
   static Future<Map<String, dynamic>?> _selectFile() async {
     try {
-      final webApp = js.context['Telegram']['WebApp'];
-      
-      // Используем Telegram Web App API для выбора файла
       final completer = Completer<Map<String, dynamic>?>();
       
       // Создаем input элемент для выбора файла
@@ -185,27 +174,36 @@ class TelegramWebAppService {
 
   // Показываем уведомление пользователю
   static void showAlert(String message) {
-    if (!isTelegramWebApp) return;
-    
-    try {
-      final webApp = js.context['Telegram']['WebApp'];
-      webApp.callMethod('showAlert', [message]);
-    } catch (e) {
-      print('Error showing alert: $e');
+    if (isTelegramWebApp) {
+      try {
+        final webApp = js.context['Telegram']['WebApp'];
+        webApp.callMethod('showAlert', [message]);
+      } catch (e) {
+        print('Error showing alert: $e');
+        // Fallback к обычному alert
+        html.window.alert(message);
+      }
+    } else {
+      // Используем обычный alert для браузера
+      html.window.alert(message);
     }
   }
 
   // Показываем подтверждение пользователю
   static Future<bool> showConfirm(String message) async {
-    if (!isTelegramWebApp) return false;
-    
-    try {
-      final webApp = js.context['Telegram']['WebApp'];
-      final result = webApp.callMethod('showConfirm', [message]);
-      return result == true;
-    } catch (e) {
-      print('Error showing confirm: $e');
-      return false;
+    if (isTelegramWebApp) {
+      try {
+        final webApp = js.context['Telegram']['WebApp'];
+        final result = webApp.callMethod('showConfirm', [message]);
+        return result == true;
+      } catch (e) {
+        print('Error showing confirm: $e');
+        // Fallback к обычному confirm
+        return html.window.confirm(message);
+      }
+    } else {
+      // Используем обычный confirm для браузера
+      return html.window.confirm(message);
     }
   }
 } 

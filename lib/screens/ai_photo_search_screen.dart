@@ -30,10 +30,7 @@ class _AiPhotoSearchScreenState extends State<AiPhotoSearchScreen> {
       return;
     }
 
-    if (!TelegramWebAppService.isTelegramWebApp) {
-      _showError('Эта функция доступна только в Telegram');
-      return;
-    }
+    // Убираем проверку на Telegram Web App - теперь работает везде
 
     setState(() {
       _isUploading = true;
