@@ -48,6 +48,112 @@ class TelegramWebAppService {
     return userData?['id']?.toString();
   }
 
+  // Вызываем метод Telegram Web App API
+  static Future<dynamic> callTelegramMethod(String method, [Map<String, dynamic>? params]) async {
+    if (!isTelegramWebApp) return null;
+    
+    try {
+      final webApp = js.context['Telegram']['WebApp'];
+      if (params != null) {
+        return webApp.callMethod(method, [js.JsObject.jsify(params)]);
+      } else {
+        return webApp.callMethod(method);
+      }
+    } catch (e) {
+      print('Error calling Telegram method $method: $e');
+      return null;
+    }
+  }
+
+  // Получаем список контактов
+  static Future<List<Map<String, dynamic>>?> getContacts() async {
+    try {
+      final contacts = await callTelegramMethod('getContacts');
+      if (contacts != null && contacts is List) {
+        return contacts.map((contact) => {
+          'id': contact['user_id'],
+          'first_name': contact['first_name'],
+          'last_name': contact['last_name'],
+          'username': contact['username'],
+          'phone_number': contact['phone_number'],
+        }).toList();
+      }
+      return null;
+    } catch (e) {
+      print('Error getting contacts: $e');
+      return null;
+    }
+  }
+
+  // Получаем список чатов
+  static Future<List<Map<String, dynamic>>?> getChats() async {
+    try {
+      final chats = await callTelegramMethod('getChats');
+      if (chats != null && chats is List) {
+        return chats.map((chat) => {
+          'id': chat['id'],
+          'title': chat['title'],
+          'username': chat['username'],
+          'type': chat['type'],
+        }).toList();
+      }
+      return null;
+    } catch (e) {
+      print('Error getting chats: $e');
+      return null;
+    }
+  }
+
+  // Отправляем сообщение
+  static Future<bool> sendMessage(String chatId, String text, {String? parseMode}) async {
+    try {
+      final params = {
+        'chat_id': chatId,
+        'text': text,
+      };
+      
+      if (parseMode != null) {
+        params['parse_mode'] = parseMode;
+      }
+      
+      final result = await callTelegramMethod('sendMessage', params);
+      return result != null;
+    } catch (e) {
+      print('Error sending message: $e');
+      return false;
+    }
+  }
+
+  // Копируем текст в буфер обмена
+  static Future<bool> copyToClipboard(String text) async {
+    try {
+      final result = await callTelegramMethod('copyToClipboard', {'text': text});
+      return result == true;
+    } catch (e) {
+      print('Error copying to clipboard: $e');
+      return false;
+    }
+  }
+
+  // Показываем popup с кнопками
+  static Future<Map<String, dynamic>?> showPopup({
+    required String title,
+    required String message,
+    required List<Map<String, dynamic>> buttons,
+  }) async {
+    try {
+      final result = await callTelegramMethod('showPopup', {
+        'title': title,
+        'message': message,
+        'buttons': buttons,
+      });
+      return result;
+    } catch (e) {
+      print('Error showing popup: $e');
+      return null;
+    }
+  }
+
   // Загружаем фото через HTML5 File API
   static Future<PhotoUploadModel?> uploadPhoto({
     required String category,

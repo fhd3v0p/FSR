@@ -15,10 +15,10 @@ class InviteFriendsScreen extends StatefulWidget {
 }
 
 class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
-  List<Map<String, dynamic>> _selectedContacts = [];
   bool _isLoading = false;
   String? _referralCode;
   String? _referralLink;
+  int _invitesSent = 0;
 
   @override
   void initState() {
@@ -33,27 +33,24 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
     }
   }
 
-  Future<void> _selectContacts() async {
+  Future<void> _shareWithFriends() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Проверяем, запущено ли приложение в Telegram
       if (TelegramWebAppService.isTelegramWebApp) {
-        // Используем Telegram Web App API для выбора контактов
-        final contacts = await _selectContactsTelegram();
-        if (contacts != null) {
-          setState(() {
-            _selectedContacts = contacts;
-          });
+        // Используем Telegram Web App API для открытия диалога выбора чатов
+        final success = await _openTelegramShareDialog();
+        if (success) {
+          _showSuccess('Диалог выбора чатов открыт! Выберите друзей для отправки приглашения.');
         }
       } else {
-        // Fallback для браузера - показываем инструкцию
+        // Fallback для браузера
         _showBrowserInstructions();
       }
     } catch (e) {
-      _showError('Ошибка выбора контактов: $e');
+      _showError('Ошибка открытия диалога: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -61,60 +58,268 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
     }
   }
 
-  Future<List<Map<String, dynamic>>?> _selectContactsTelegram() async {
+  Future<bool> _openTelegramShareDialog() async {
     try {
-      final webApp = js.context['Telegram']['WebApp'];
+      // Генерируем текст приглашения
+      final inviteText = _generateInviteText();
       
-      // Используем Telegram Web App API для выбора контактов
-      final result = await _callTelegramMethod('showPopup', {
-        'title': 'Выберите друзей',
-        'message': 'Выберите друзей для приглашения в FSR',
-        'buttons': [
+      // Используем Telegram Web App API для открытия диалога выбора чатов
+      final result = await TelegramWebAppService.showPopup(
+        title: 'Поделиться с друзьями',
+        message: 'Выберите друзей для отправки приглашения в FSR',
+        buttons: [
           {
-            'id': 'select_contacts',
-            'type': 'select_contacts',
-            'text': 'Выбрать контакты'
+            'id': 'share_contacts',
+            'type': 'share_contacts',
+            'text': 'Выбрать из контактов'
+          },
+          {
+            'id': 'share_chats',
+            'type': 'share_chats', 
+            'text': 'Выбрать из чатов'
+          },
+          {
+            'id': 'share_link',
+            'type': 'share_link',
+            'text': 'Поделиться ссылкой'
           },
           {
             'id': 'cancel',
             'type': 'cancel',
             'text': 'Отмена'
           }
-        ]
-      });
+        ],
+      );
 
-      if (result != null && result['button_id'] == 'select_contacts') {
-        // Получаем выбранные контакты
-        final contacts = await _callTelegramMethod('getContacts');
-        if (contacts != null && contacts is List) {
-          return contacts.map((contact) => {
-            'id': contact['user_id'],
-            'name': contact['first_name'] + (contact['last_name'] != null ? ' ${contact['last_name']}' : ''),
-            'username': contact['username'],
-            'phone': contact['phone_number'],
-          }).toList();
+      if (result != null) {
+        switch (result['button_id']) {
+          case 'share_contacts':
+            return await _shareWithContacts();
+          case 'share_chats':
+            return await _shareWithChats();
+          case 'share_link':
+            return await _shareLink();
+          default:
+            return false;
         }
+      }
+      
+      return false;
+    } catch (e) {
+      print('Error opening share dialog: $e');
+      return false;
+    }
+  }
+
+  Future<bool> _shareWithContacts() async {
+    try {
+      // Получаем список контактов
+      final contacts = await TelegramWebAppService.getContacts();
+      if (contacts != null && contacts.isNotEmpty) {
+        // Показываем диалог выбора контактов
+        final selectedContacts = await _showContactSelectionDialog(contacts);
+        if (selectedContacts != null && selectedContacts.isNotEmpty) {
+          // Отправляем приглашения выбранным контактам
+          return await _sendInvitesToContacts(selectedContacts);
+        }
+      } else {
+        _showError('У вас нет контактов для приглашения');
+      }
+      return false;
+    } catch (e) {
+      print('Error sharing with contacts: $e');
+      return false;
+    }
+  }
+
+  Future<bool> _shareWithChats() async {
+    try {
+      // Получаем список чатов
+      final chats = await TelegramWebAppService.getChats();
+      if (chats != null && chats.isNotEmpty) {
+        // Показываем диалог выбора чатов
+        final selectedChats = await _showChatSelectionDialog(chats);
+        if (selectedChats != null && selectedChats.isNotEmpty) {
+          // Отправляем приглашения в выбранные чаты
+          return await _sendInvitesToChats(selectedChats);
+        }
+      } else {
+        _showError('У вас нет чатов для приглашения');
+      }
+      return false;
+    } catch (e) {
+      print('Error sharing with chats: $e');
+      return false;
+    }
+  }
+
+  Future<bool> _shareLink() async {
+    try {
+      // Используем Telegram Web App API для копирования ссылки в буфер обмена
+      final result = await TelegramWebAppService.copyToClipboard(_referralLink ?? '');
+      
+      if (result) {
+        _showSuccess('Ссылка скопирована в буфер обмена! Теперь можете поделиться ею вручную.');
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print('Error sharing link: $e');
+      return false;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>?> _showContactSelectionDialog(List<Map<String, dynamic>> contacts) async {
+    try {
+      final result = await TelegramWebAppService.showPopup(
+        title: 'Выберите контакты',
+        message: 'Выберите контакты для отправки приглашения',
+        buttons: contacts.take(10).map((contact) => {
+          'id': 'contact_${contact['id']}',
+          'type': 'select',
+          'text': '${contact['first_name']} ${contact['last_name'] ?? ''}'
+        }).toList()..add({
+          'id': 'confirm',
+          'type': 'confirm',
+          'text': 'Отправить выбранным'
+        })..add({
+          'id': 'cancel',
+          'type': 'cancel',
+          'text': 'Отмена'
+        }),
+      );
+
+      if (result != null && result['button_id'] == 'confirm') {
+        // Возвращаем выбранные контакты
+        return contacts.where((contact) => 
+          result['selected_ids']?.contains('contact_${contact['id']}') == true
+        ).map((contact) => {
+          'id': contact['id'],
+          'name': '${contact['first_name']} ${contact['last_name'] ?? ''}',
+          'username': contact['username'],
+          'type': 'contact'
+        }).toList();
       }
       
       return null;
     } catch (e) {
-      print('Error selecting contacts: $e');
+      print('Error showing contact selection: $e');
       return null;
     }
   }
 
-  Future<dynamic> _callTelegramMethod(String method, [Map<String, dynamic>? params]) async {
+  Future<List<Map<String, dynamic>>?> _showChatSelectionDialog(List<Map<String, dynamic>> chats) async {
     try {
-      final webApp = js.context['Telegram']['WebApp'];
-      if (params != null) {
-        return webApp.callMethod(method, [js.JsObject.jsify(params)]);
-      } else {
-        return webApp.callMethod(method);
+      final result = await TelegramWebAppService.showPopup(
+        title: 'Выберите чаты',
+        message: 'Выберите чаты для отправки приглашения',
+        buttons: chats.take(10).map((chat) => {
+          'id': 'chat_${chat['id']}',
+          'type': 'select',
+          'text': chat['title'] ?? chat['username'] ?? 'Unknown'
+        }).toList()..add({
+          'id': 'confirm',
+          'type': 'confirm',
+          'text': 'Отправить в выбранные'
+        })..add({
+          'id': 'cancel',
+          'type': 'cancel',
+          'text': 'Отмена'
+        }),
+      );
+
+      if (result != null && result['button_id'] == 'confirm') {
+        // Возвращаем выбранные чаты
+        return chats.where((chat) => 
+          result['selected_ids']?.contains('chat_${chat['id']}') == true
+        ).map((chat) => {
+          'id': chat['id'],
+          'name': chat['title'] ?? chat['username'] ?? 'Unknown',
+          'type': 'chat'
+        }).toList();
       }
+      
+      return null;
     } catch (e) {
-      print('Error calling Telegram method $method: $e');
+      print('Error showing chat selection: $e');
       return null;
     }
+  }
+
+  Future<bool> _sendInvitesToContacts(List<Map<String, dynamic>> contacts) async {
+    try {
+      int successCount = 0;
+      final inviteText = _generateInviteText();
+      
+      for (final contact in contacts) {
+        try {
+          final success = await TelegramWebAppService.sendMessage(
+            contact['id'].toString(),
+            inviteText,
+            parseMode: 'HTML'
+          );
+          
+          if (success) {
+            successCount++;
+          }
+        } catch (e) {
+          print('Error sending invite to contact ${contact['name']}: $e');
+        }
+      }
+
+      if (successCount > 0) {
+        setState(() {
+          _invitesSent += successCount;
+        });
+        _showSuccess('Приглашения отправлены $successCount контактам! 🎉');
+        return true;
+      }
+      
+      return false;
+    } catch (e) {
+      print('Error sending invites to contacts: $e');
+      return false;
+    }
+  }
+
+  Future<bool> _sendInvitesToChats(List<Map<String, dynamic>> chats) async {
+    try {
+      int successCount = 0;
+      final inviteText = _generateInviteText();
+      
+      for (final chat in chats) {
+        try {
+          final success = await TelegramWebAppService.sendMessage(
+            chat['id'].toString(),
+            inviteText,
+            parseMode: 'HTML'
+          );
+          
+          if (success) {
+            successCount++;
+          }
+        } catch (e) {
+          print('Error sending invite to chat ${chat['name']}: $e');
+        }
+      }
+
+      if (successCount > 0) {
+        setState(() {
+          _invitesSent += successCount;
+        });
+        _showSuccess('Приглашения отправлены в $successCount чатов! 🎉');
+        return true;
+      }
+      
+      return false;
+    } catch (e) {
+      print('Error sending invites to chats: $e');
+      return false;
+    }
+  }
+
+  Future<dynamic> _callTelegramMethod(String method, [Map<String, dynamic>? params]) async {
+    return TelegramWebAppService.callTelegramMethod(method, params);
   }
 
   void _showBrowserInstructions() {
@@ -170,66 +375,6 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
         ],
       ),
     );
-  }
-
-  Future<void> _sendInvites() async {
-    if (_selectedContacts.isEmpty) {
-      _showError('Выберите хотя бы одного друга');
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      int successCount = 0;
-      
-      for (final contact in _selectedContacts) {
-        try {
-          // Отправляем приглашение через Telegram API
-          final success = await _sendInviteToContact(contact);
-          if (success) {
-            successCount++;
-          }
-        } catch (e) {
-          print('Error sending invite to ${contact['name']}: $e');
-        }
-      }
-
-      if (successCount > 0) {
-        _showSuccess('Приглашения отправлены $successCount друзьям! 🎉');
-        setState(() {
-          _selectedContacts.clear();
-        });
-      } else {
-        _showError('Не удалось отправить приглашения');
-      }
-    } catch (e) {
-      _showError('Ошибка отправки приглашений: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<bool> _sendInviteToContact(Map<String, dynamic> contact) async {
-    try {
-      final inviteText = _generateInviteText();
-      
-      // Используем Telegram Web App API для отправки сообщения
-      final result = await _callTelegramMethod('sendMessage', {
-        'chat_id': contact['id'],
-        'text': inviteText,
-        'parse_mode': 'HTML'
-      });
-
-      return result != null;
-    } catch (e) {
-      print('Error sending invite: $e');
-      return false;
-    }
   }
 
   String _generateInviteText() {
@@ -294,7 +439,7 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
                 children: [
                   const SizedBox(height: 40),
                   const Text(
-                    'Пригласи друзей',
+                    'Поделиться с друзьями',
                     style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'NauryzKeds',
@@ -305,7 +450,7 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'И получи бонусы за каждого друга',
+                    'Пригласи друзей и получи бонусы',
                     style: TextStyle(
                       color: Colors.white70,
                       fontFamily: 'NauryzKeds',
@@ -389,151 +534,105 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
                   
                   const SizedBox(height: 24),
                   
-                  // Выбранные контакты
-                  if (_selectedContacts.isNotEmpty) ...[
-                    Text(
-                      'Выбрано друзей: ${_selectedContacts.length}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'NauryzKeds',
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                  // Статистика приглашений
+                  if (_invitesSent > 0) ...[
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.2),
+                        border: Border.all(color: Colors.green.withOpacity(0.5)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.check_circle, color: Colors.green, size: 24),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Приглашений отправлено: $_invitesSent',
+                            style: const TextStyle(
+                              color: Colors.green,
+                              fontFamily: 'NauryzKeds',
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: _selectedContacts.length,
-                        itemBuilder: (context, index) {
-                          final contact = _selectedContacts[index];
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.08),
-                              border: Border.all(color: Colors.white24),
-                            ),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor: const Color(0xFFFF6EC7),
-                                  child: Text(
-                                    contact['name'][0].toUpperCase(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        contact['name'],
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontFamily: 'NauryzKeds',
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      if (contact['username'] != null)
-                                        Text(
-                                          '@${contact['username']}',
-                                          style: const TextStyle(
-                                            color: Colors.white70,
-                                            fontFamily: 'NauryzKeds',
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.remove_circle, color: Colors.red),
-                                  onPressed: () {
-                                    setState(() {
-                                      _selectedContacts.removeAt(index);
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+                    const SizedBox(height: 24),
                   ],
                   
-                  const SizedBox(height: 24),
-                  
-                  // Кнопки действий
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _isLoading ? null : _selectContacts,
-                          icon: _isLoading 
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                  ),
-                                )
-                              : const Icon(Icons.people, color: Colors.white),
-                          label: Text(
-                            _isLoading ? 'Загрузка...' : 'Выбрать друзей',
-                            style: const TextStyle(
-                              fontFamily: 'NauryzKeds',
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                              color: Colors.white,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white.withOpacity(0.08),
-                            foregroundColor: Colors.white,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.zero,
-                              side: BorderSide(color: Colors.white, width: 1.5),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            elevation: 0,
-                          ),
+                  // Кнопка поделиться
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _isLoading ? null : _shareWithFriends,
+                      icon: _isLoading 
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Icon(Icons.share, color: Colors.white, size: 28),
+                      label: Text(
+                        _isLoading ? 'Открытие диалога...' : 'Поделиться с друзьями',
+                        style: const TextStyle(
+                          fontFamily: 'NauryzKeds',
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: Colors.white,
+                          letterSpacing: 1.1,
                         ),
                       ),
-                      if (_selectedContacts.isNotEmpty) ...[
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: _isLoading ? null : _sendInvites,
-                            icon: const Icon(Icons.send, color: Colors.white),
-                            label: const Text(
-                              'Отправить',
-                              style: TextStyle(
-                                fontFamily: 'NauryzKeds',
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                color: Colors.white,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFF6EC7),
-                              foregroundColor: Colors.white,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.zero,
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              elevation: 0,
-                            ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFF6EC7),
+                        foregroundColor: Colors.white,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero,
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        elevation: 0,
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Дополнительная информация
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      border: Border.all(color: Colors.white24),
+                    ),
+                    child: const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '💡 Как это работает:',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'NauryzKeds',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          '1. Нажмите "Поделиться с друзьями"\n'
+                          '2. Выберите друзей из контактов или чатов\n'
+                          '3. Отправьте им приглашение\n'
+                          '4. Получите бонусы за каждого друга!',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontFamily: 'NauryzKeds',
+                            fontSize: 14,
                           ),
                         ),
                       ],
-                    ],
+                    ),
                   ),
                 ],
               ),
