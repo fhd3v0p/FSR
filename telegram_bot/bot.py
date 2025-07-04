@@ -377,6 +377,95 @@ async def get_top_referrers() -> str:
         print(f"Error getting top referrers: {e}")
         return "Ошибка получения данных"
 
+# Новые методы для поддержки shareMessage
+@dp.message(Command("save_message"))
+async def cmd_save_message(message: types.Message):
+    """Сохраняет подготовленное сообщение для отправки через Web App"""
+    try:
+        # Создаем inline query result для приглашения
+        from aiogram.types import InlineQueryResultArticle, InputTextMessageContent
+        
+        result = InlineQueryResultArticle(
+            id="invite_message",
+            title="Приглашение в FSR",
+            description="Пригласи друзей в Fresh Style Russia",
+            input_message_content=InputTextMessageContent(
+                message_text=f"""
+🔥 <b>Привет! Нашел крутую платформу для поиска артистов - Fresh Style Russia!</b>
+
+🎯 <b>Что тут есть:</b>
+• AI-поиск мастеров по фото
+• Каталог артистов по городам  
+• Розыгрыш на 170,000₽
+• Бьюти-услуги и сертификаты
+
+🎁 <b>Присоединяйся по моей ссылке и получи бонусы:</b>
+<a href="https://t.me/FSRUBOT?start=ref{message.from_user.id}">🚀 Открыть FSR</a>
+
+💎 <b>Вместе выиграем призы!</b>
+
+#FSR #FreshStyleRussia #Giveaway
+                """,
+                parse_mode=ParseMode.HTML
+            )
+        )
+        
+        # Сохраняем подготовленное сообщение
+        prepared_message = await bot.save_prepared_inline_message(
+            user_id=message.from_user.id,
+            result=result,
+            allow_user_chats=True,
+            allow_bot_chats=False,
+            allow_group_chats=True,
+            allow_channel_chats=False
+        )
+        
+        await message.answer(
+            f"✅ Сообщение сохранено! ID: {prepared_message.id}\n"
+            f"⏰ Истекает: {prepared_message.expiration_date}",
+            parse_mode=ParseMode.MARKDOWN
+        )
+        
+    except Exception as e:
+        logger.error(f"Error saving prepared message: {e}")
+        await message.answer("❌ Ошибка сохранения сообщения")
+
+@dp.message(Command("test_share"))
+async def cmd_test_share(message: types.Message):
+    """Тестирует отправку сообщения через Web App"""
+    try:
+        # Создаем тестовое сообщение
+        from aiogram.types import InlineQueryResultArticle, InputTextMessageContent
+        
+        result = InlineQueryResultArticle(
+            id="test_invite",
+            title="Тестовое приглашение",
+            description="Тестовое сообщение для проверки shareMessage",
+            input_message_content=InputTextMessageContent(
+                message_text="🔥 Тестовое приглашение в FSR! 🚀",
+                parse_mode=ParseMode.HTML
+            )
+        )
+        
+        # Сохраняем и сразу отправляем
+        prepared_message = await bot.save_prepared_inline_message(
+            user_id=message.from_user.id,
+            result=result,
+            allow_user_chats=True,
+            allow_group_chats=True
+        )
+        
+        await message.answer(
+            f"✅ Тестовое сообщение готово!\n"
+            f"ID: `{prepared_message.id}`\n\n"
+            f"Теперь можно использовать shareMessage в Web App",
+            parse_mode=ParseMode.MARKDOWN
+        )
+        
+    except Exception as e:
+        logger.error(f"Error in test share: {e}")
+        await message.answer(f"❌ Ошибка: {str(e)}")
+
 @dp.message()
 async def handle_all_messages(message: types.Message):
     """Обработка всех остальных сообщений"""

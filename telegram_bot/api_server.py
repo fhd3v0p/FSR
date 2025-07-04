@@ -288,6 +288,81 @@ def get_user_stats(user_id):
         logger.error(f"Error getting user stats: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/api/create-prepared-message', methods=['POST'])
+def create_prepared_message():
+    """API endpoint для создания подготовленного сообщения для shareMessage"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        # Проверяем обязательные поля
+        required_fields = ['title', 'description', 'message_text', 'user_id']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        # Импортируем необходимые модули для работы с ботом
+        import asyncio
+        import sys
+        import os
+        
+        # Добавляем путь к модулям бота
+        sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+        
+        from bot import bot
+        from aiogram.types import InlineQueryResultArticle, InputTextMessageContent
+        from aiogram.enums import ParseMode
+        
+        # Создаем inline query result
+        result = InlineQueryResultArticle(
+            id=f"invite_{data['user_id']}_{int(datetime.now().timestamp())}",
+            title=data['title'],
+            description=data['description'],
+            input_message_content=InputTextMessageContent(
+                message_text=data['message_text'],
+                parse_mode=data.get('parse_mode', ParseMode.HTML)
+            )
+        )
+        
+        # Создаем новое событие для асинхронного выполнения
+        async def save_message():
+            try:
+                prepared_message = await bot.save_prepared_inline_message(
+                    user_id=int(data['user_id']),
+                    result=result,
+                    allow_user_chats=True,
+                    allow_bot_chats=False,
+                    allow_group_chats=True,
+                    allow_channel_chats=False
+                )
+                return prepared_message.id
+            except Exception as e:
+                logger.error(f"Error saving prepared message: {e}")
+                return None
+        
+        # Запускаем асинхронную функцию
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            message_id = loop.run_until_complete(save_message())
+        finally:
+            loop.close()
+        
+        if message_id:
+            logger.info(f"Prepared message created: user_id={data['user_id']}, message_id={message_id}")
+            return jsonify({
+                'success': True,
+                'message_id': message_id
+            }), 200
+        else:
+            return jsonify({'error': 'Failed to create prepared message'}), 500
+        
+    except Exception as e:
+        logger.error(f"Error creating prepared message: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
 if __name__ == '__main__':
     # Инициализируем таблицу при запуске
     init_photo_uploads_table()

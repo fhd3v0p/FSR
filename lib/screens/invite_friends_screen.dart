@@ -39,18 +39,22 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
     });
 
     try {
-      if (TelegramWebAppService.isTelegramWebApp) {
-        // Используем Telegram Web App API для открытия диалога выбора чатов
-        final success = await _openTelegramShareDialog();
-        if (success) {
-          _showSuccess('Диалог выбора чатов открыт! Выберите друзей для отправки приглашения.');
-        }
+      // Пробуем использовать новый метод shareMessage
+      final success = await TelegramWebAppService.inviteFriendsWithShare();
+      
+      if (success) {
+        _showSuccess('Отлично! Диалог выбора друзей открыт. Выберите, кому отправить приглашение!');
+        setState(() {
+          _invitesSent++;
+        });
       } else {
-        // Fallback для браузера
-        _showBrowserInstructions();
+        // Fallback к старому методу
+        _showLinkDialog();
       }
     } catch (e) {
-      _showError('Ошибка открытия диалога: $e');
+      print('Error with shareMessage: $e');
+      // Fallback к старому методу
+      _showLinkDialog();
     } finally {
       setState(() {
         _isLoading = false;
@@ -58,30 +62,22 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
     }
   }
 
-  Future<bool> _openTelegramShareDialog() async {
+  Future<bool> _showTelegramShareOptions() async {
     try {
-      // Генерируем текст приглашения
-      final inviteText = _generateInviteText();
-      
-      // Используем Telegram Web App API для открытия диалога выбора чатов
-      final result = await TelegramWebAppService.showPopup(
+      // Показываем простой диалог с опциями
+      final result = await TelegramWebAppService.showMainButtonPopup(
         title: 'Поделиться с друзьями',
-        message: 'Выберите друзей для отправки приглашения в FSR',
+        message: 'Выберите способ приглашения:',
         buttons: [
           {
-            'id': 'share_contacts',
-            'type': 'share_contacts',
-            'text': 'Выбрать из контактов'
+            'id': 'copy_link',
+            'type': 'default',
+            'text': 'Скопировать ссылку'
           },
           {
-            'id': 'share_chats',
-            'type': 'share_chats', 
-            'text': 'Выбрать из чатов'
-          },
-          {
-            'id': 'share_link',
-            'type': 'share_link',
-            'text': 'Поделиться ссылкой'
+            'id': 'show_link',
+            'type': 'default',
+            'text': 'Показать ссылку'
           },
           {
             'id': 'cancel',
@@ -93,12 +89,11 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
 
       if (result != null) {
         switch (result['button_id']) {
-          case 'share_contacts':
-            return await _shareWithContacts();
-          case 'share_chats':
-            return await _shareWithChats();
-          case 'share_link':
-            return await _shareLink();
+          case 'copy_link':
+            return await _copyLinkToClipboard();
+          case 'show_link':
+            _showLinkDialog();
+            return true;
           default:
             return false;
         }
@@ -106,220 +101,84 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
       
       return false;
     } catch (e) {
-      print('Error opening share dialog: $e');
-      return false;
+      print('Error showing share options: $e');
+      // Fallback: показываем ссылку в диалоге
+      _showLinkDialog();
+      return true;
     }
   }
 
-  Future<bool> _shareWithContacts() async {
+  Future<bool> _copyLinkToClipboard() async {
     try {
-      // Получаем список контактов
-      final contacts = await TelegramWebAppService.getContacts();
-      if (contacts != null && contacts.isNotEmpty) {
-        // Показываем диалог выбора контактов
-        final selectedContacts = await _showContactSelectionDialog(contacts);
-        if (selectedContacts != null && selectedContacts.isNotEmpty) {
-          // Отправляем приглашения выбранным контактам
-          return await _sendInvitesToContacts(selectedContacts);
-        }
+      final success = await TelegramWebAppService.copyToClipboard(_referralLink ?? '');
+      
+      if (success) {
+        _showSuccess('Ссылка скопирована! Теперь можете поделиться ею с друзьями.');
+        return true;
       } else {
-        _showError('У вас нет контактов для приглашения');
-      }
-      return false;
-    } catch (e) {
-      print('Error sharing with contacts: $e');
-      return false;
-    }
-  }
-
-  Future<bool> _shareWithChats() async {
-    try {
-      // Получаем список чатов
-      final chats = await TelegramWebAppService.getChats();
-      if (chats != null && chats.isNotEmpty) {
-        // Показываем диалог выбора чатов
-        final selectedChats = await _showChatSelectionDialog(chats);
-        if (selectedChats != null && selectedChats.isNotEmpty) {
-          // Отправляем приглашения в выбранные чаты
-          return await _sendInvitesToChats(selectedChats);
-        }
-      } else {
-        _showError('У вас нет чатов для приглашения');
-      }
-      return false;
-    } catch (e) {
-      print('Error sharing with chats: $e');
-      return false;
-    }
-  }
-
-  Future<bool> _shareLink() async {
-    try {
-      // Используем Telegram Web App API для копирования ссылки в буфер обмена
-      final result = await TelegramWebAppService.copyToClipboard(_referralLink ?? '');
-      
-      if (result) {
-        _showSuccess('Ссылка скопирована в буфер обмена! Теперь можете поделиться ею вручную.');
+        // Fallback: показываем ссылку в диалоге
+        _showLinkDialog();
         return true;
       }
-      return false;
     } catch (e) {
-      print('Error sharing link: $e');
-      return false;
+      print('Error copying link: $e');
+      // Fallback: показываем ссылку в диалоге
+      _showLinkDialog();
+      return true;
     }
   }
 
-  Future<List<Map<String, dynamic>>?> _showContactSelectionDialog(List<Map<String, dynamic>> contacts) async {
-    try {
-      final result = await TelegramWebAppService.showPopup(
-        title: 'Выберите контакты',
-        message: 'Выберите контакты для отправки приглашения',
-        buttons: contacts.take(10).map((contact) => {
-          'id': 'contact_${contact['id']}',
-          'type': 'select',
-          'text': '${contact['first_name']} ${contact['last_name'] ?? ''}'
-        }).toList()..add({
-          'id': 'confirm',
-          'type': 'confirm',
-          'text': 'Отправить выбранным'
-        })..add({
-          'id': 'cancel',
-          'type': 'cancel',
-          'text': 'Отмена'
-        }),
-      );
-
-      if (result != null && result['button_id'] == 'confirm') {
-        // Возвращаем выбранные контакты
-        return contacts.where((contact) => 
-          result['selected_ids']?.contains('contact_${contact['id']}') == true
-        ).map((contact) => {
-          'id': contact['id'],
-          'name': '${contact['first_name']} ${contact['last_name'] ?? ''}',
-          'username': contact['username'],
-          'type': 'contact'
-        }).toList();
-      }
-      
-      return null;
-    } catch (e) {
-      print('Error showing contact selection: $e');
-      return null;
-    }
-  }
-
-  Future<List<Map<String, dynamic>>?> _showChatSelectionDialog(List<Map<String, dynamic>> chats) async {
-    try {
-      final result = await TelegramWebAppService.showPopup(
-        title: 'Выберите чаты',
-        message: 'Выберите чаты для отправки приглашения',
-        buttons: chats.take(10).map((chat) => {
-          'id': 'chat_${chat['id']}',
-          'type': 'select',
-          'text': chat['title'] ?? chat['username'] ?? 'Unknown'
-        }).toList()..add({
-          'id': 'confirm',
-          'type': 'confirm',
-          'text': 'Отправить в выбранные'
-        })..add({
-          'id': 'cancel',
-          'type': 'cancel',
-          'text': 'Отмена'
-        }),
-      );
-
-      if (result != null && result['button_id'] == 'confirm') {
-        // Возвращаем выбранные чаты
-        return chats.where((chat) => 
-          result['selected_ids']?.contains('chat_${chat['id']}') == true
-        ).map((chat) => {
-          'id': chat['id'],
-          'name': chat['title'] ?? chat['username'] ?? 'Unknown',
-          'type': 'chat'
-        }).toList();
-      }
-      
-      return null;
-    } catch (e) {
-      print('Error showing chat selection: $e');
-      return null;
-    }
-  }
-
-  Future<bool> _sendInvitesToContacts(List<Map<String, dynamic>> contacts) async {
-    try {
-      int successCount = 0;
-      final inviteText = _generateInviteText();
-      
-      for (final contact in contacts) {
-        try {
-          final success = await TelegramWebAppService.sendMessage(
-            contact['id'].toString(),
-            inviteText,
-            parseMode: 'HTML'
-          );
-          
-          if (success) {
-            successCount++;
-          }
-        } catch (e) {
-          print('Error sending invite to contact ${contact['name']}: $e');
-        }
-      }
-
-      if (successCount > 0) {
-        setState(() {
-          _invitesSent += successCount;
-        });
-        _showSuccess('Приглашения отправлены $successCount контактам! 🎉');
-        return true;
-      }
-      
-      return false;
-    } catch (e) {
-      print('Error sending invites to contacts: $e');
-      return false;
-    }
-  }
-
-  Future<bool> _sendInvitesToChats(List<Map<String, dynamic>> chats) async {
-    try {
-      int successCount = 0;
-      final inviteText = _generateInviteText();
-      
-      for (final chat in chats) {
-        try {
-          final success = await TelegramWebAppService.sendMessage(
-            chat['id'].toString(),
-            inviteText,
-            parseMode: 'HTML'
-          );
-          
-          if (success) {
-            successCount++;
-          }
-        } catch (e) {
-          print('Error sending invite to chat ${chat['name']}: $e');
-        }
-      }
-
-      if (successCount > 0) {
-        setState(() {
-          _invitesSent += successCount;
-        });
-        _showSuccess('Приглашения отправлены в $successCount чатов! 🎉');
-        return true;
-      }
-      
-      return false;
-    } catch (e) {
-      print('Error sending invites to chats: $e');
-      return false;
-    }
-  }
-
-  Future<dynamic> _callTelegramMethod(String method, [Map<String, dynamic>? params]) async {
-    return TelegramWebAppService.callTelegramMethod(method, params);
+  void _showLinkDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.black87,
+        title: const Text(
+          'Ссылка для приглашения',
+          style: TextStyle(color: Colors.white, fontFamily: 'NauryzKeds'),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Скопируйте эту ссылку и отправьте друзьям:',
+              style: TextStyle(color: Colors.white, fontFamily: 'NauryzKeds'),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[900],
+                border: Border.all(color: Colors.white24),
+              ),
+              child: SelectableText(
+                _referralLink ?? 'Ошибка генерации ссылки',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'monospace',
+                  fontSize: 12,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'За каждого приглашенного друга получите +100 XP!',
+              style: TextStyle(color: Colors.green, fontFamily: 'NauryzKeds', fontSize: 14),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'Закрыть',
+              style: TextStyle(color: Color(0xFFFF6EC7)),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showBrowserInstructions() {
@@ -577,7 +436,7 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
                             )
                           : const Icon(Icons.share, color: Colors.white, size: 28),
                       label: Text(
-                        _isLoading ? 'Открытие диалога...' : 'Поделиться с друзьями',
+                        _isLoading ? 'Загрузка...' : 'Показать ссылку',
                         style: const TextStyle(
                           fontFamily: 'NauryzKeds',
                           fontWeight: FontWeight.bold,

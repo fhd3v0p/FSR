@@ -135,23 +135,166 @@ class TelegramWebAppService {
     }
   }
 
-  // Показываем popup с кнопками
-  static Future<Map<String, dynamic>?> showPopup({
+  // Показываем popup с кнопками (правильный метод Telegram Web App API)
+  static Future<Map<String, dynamic>?> showMainButtonPopup({
     required String title,
     required String message,
     required List<Map<String, dynamic>> buttons,
   }) async {
     try {
-      final result = await callTelegramMethod('showPopup', {
+      final webApp = js.context['Telegram']['WebApp'];
+      
+      // Используем правильный метод Telegram Web App API
+      final result = await webApp.callMethod('showPopup', [{
         'title': title,
         'message': message,
         'buttons': buttons,
-      });
+      }]);
+      
       return result;
     } catch (e) {
       print('Error showing popup: $e');
       return null;
     }
+  }
+
+  // Новый метод для отправки сообщений через shareMessage
+  static Future<bool> shareMessage(String messageId, {Function(bool)? callback}) async {
+    try {
+      final webApp = js.context['Telegram']['WebApp'];
+      
+      if (callback != null) {
+        // С callback
+        await webApp.callMethod('shareMessage', [messageId, (bool success) {
+          callback(success);
+        }]);
+      } else {
+        // Без callback
+        await webApp.callMethod('shareMessage', [messageId]);
+      }
+      
+      return true;
+    } catch (e) {
+      print('Error sharing message: $e');
+      return false;
+    }
+  }
+
+  // Метод для создания и сохранения подготовленного сообщения
+  static Future<String?> createPreparedMessage({
+    required String title,
+    required String description,
+    required String messageText,
+    String? parseMode,
+  }) async {
+    try {
+      // Отправляем запрос на сервер для создания подготовленного сообщения
+      final response = await html.HttpRequest.request(
+        'https://fsr.agency/api/create-prepared-message',
+        method: 'POST',
+        sendData: jsonEncode({
+          'title': title,
+          'description': description,
+          'message_text': messageText,
+          'parse_mode': parseMode ?? 'HTML',
+          'user_id': getUserId(),
+        }),
+        requestHeaders: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.status == 200) {
+        final data = jsonDecode(response.responseText);
+        return data['message_id'];
+      }
+      
+      return null;
+    } catch (e) {
+      print('Error creating prepared message: $e');
+      return null;
+    }
+  }
+
+  // Метод для приглашения друзей через shareMessage
+  static Future<bool> inviteFriendsWithShare() async {
+    try {
+      final userId = getUserId();
+      if (userId == null) {
+        throw Exception('Не удалось получить ID пользователя');
+      }
+
+      // Создаем текст приглашения
+      final inviteText = '''
+🔥 <b>Привет! Нашел крутую платформу для поиска артистов - Fresh Style Russia!</b>
+
+🎯 <b>Что тут есть:</b>
+• AI-поиск мастеров по фото
+• Каталог артистов по городам  
+• Розыгрыш на 170,000₽
+• Бьюти-услуги и сертификаты
+
+🎁 <b>Присоединяйся по моей ссылке и получи бонусы:</b>
+<a href="https://t.me/FSRUBOT?start=ref$userId">🚀 Открыть FSR</a>
+
+💎 <b>Вместе выиграем призы!</b>
+
+#FSR #FreshStyleRussia #Giveaway
+      ''';
+
+      // Создаем подготовленное сообщение
+      final messageId = await createPreparedMessage(
+        title: 'Приглашение в FSR',
+        description: 'Пригласи друзей в Fresh Style Russia',
+        messageText: inviteText,
+        parseMode: 'HTML',
+      );
+
+      if (messageId == null) {
+        throw Exception('Не удалось создать подготовленное сообщение');
+      }
+
+      // Отправляем сообщение через shareMessage
+      final success = await shareMessage(messageId!, callback: (bool sent) {
+        if (sent) {
+          print('Сообщение успешно отправлено!');
+        } else {
+          print('Пользователь отменил отправку');
+        }
+      });
+
+      return success;
+    } catch (e) {
+      print('Error inviting friends with share: $e');
+      return false;
+    }
+  }
+
+  // Запрашиваем доступ на запись (для отправки сообщений)
+  static Future<bool> requestWriteAccess() async {
+    try {
+      final webApp = js.context['Telegram']['WebApp'];
+      
+      // Запрашиваем разрешение на отправку сообщений
+      final result = await webApp.callMethod('requestWriteAccess');
+      return result == true;
+    } catch (e) {
+      print('Error requesting write access: $e');
+      return false;
+    }
+  }
+
+  // Показываем popup с кнопками (старый метод для совместимости)
+  static Future<Map<String, dynamic>?> showPopup({
+    required String title,
+    required String message,
+    required List<Map<String, dynamic>> buttons,
+  }) async {
+    return showMainButtonPopup(
+      title: title,
+      message: message,
+      buttons: buttons,
+    );
   }
 
   // Загружаем фото через HTML5 File API
