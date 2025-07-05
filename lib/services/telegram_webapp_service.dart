@@ -205,7 +205,7 @@ class TelegramWebAppService {
       );
 
       if (response.status == 200) {
-        final data = jsonDecode(response.responseText);
+        final data = jsonDecode(response.responseText ?? '{}');
         return data['message_id'];
       }
       
@@ -216,56 +216,144 @@ class TelegramWebAppService {
     }
   }
 
-  // Метод для приглашения друзей через shareMessage
+  // Простой метод для приглашения друзей через Telegram Web App API
   static Future<bool> inviteFriendsWithShare() async {
     try {
       final userId = getUserId();
       if (userId == null) {
-        throw Exception('Не удалось получить ID пользователя');
+        showAlert('Откройте приложение в Telegram для использования этой функции!');
+        return false;
       }
 
+      // Создаем реферальную ссылку
+      final referralLink = "https://t.me/FSRUBOT?start=ref$userId";
       // Создаем текст приглашения
       final inviteText = '''
-🔥 <b>Привет! Нашел крутую платформу для поиска артистов - Fresh Style Russia!</b>
+🔥 Привет! Нашел крутую платформу для поиска артистов - Fresh Style Russia!
 
-🎯 <b>Что тут есть:</b>
+🎯 Что тут есть:
 • AI-поиск мастеров по фото
 • Каталог артистов по городам  
 • Розыгрыш на 170,000₽
 • Бьюти-услуги и сертификаты
 
-🎁 <b>Присоединяйся по моей ссылке и получи бонусы:</b>
-<a href="https://t.me/FSRUBOT?start=ref$userId">🚀 Открыть FSR</a>
+🎁 Присоединяйся по моей ссылке и получи бонусы:
+$referralLink
 
-💎 <b>Вместе выиграем призы!</b>
-
+💎 Вместе выиграем призы!
 #FSR #FreshStyleRussia #Giveaway
       ''';
 
-      // Создаем подготовленное сообщение
-      final messageId = await createPreparedMessage(
-        title: 'Приглашение в FSR',
-        description: 'Пригласи друзей в Fresh Style Russia',
-        messageText: inviteText,
-        parseMode: 'HTML',
-      );
+      // Всегда используем fallback для надежности
+      try {
+        // Открываем Telegram share через ссылку (работает везде)
+        final url = 'https://t.me/share/url?url=' +
+            Uri.encodeComponent(referralLink) +
+            '&text=' +
+            Uri.encodeComponent(inviteText);
+        
+        // Открываем в новом окне/вкладке
+        html.window.open(url, '_blank');
+        
+        // Убираем уведомление - пользователь сам увидит диалог
+        return true;
+        
+      } catch (e) {
+        // Если не удалось открыть ссылку, показываем popup с опциями
+        final result = await showMainButtonPopup(
+          title: 'Поделиться с друзьями',
+          message: 'Выберите способ приглашения:',
+          buttons: [
+            {
+              'id': 'copy_link',
+              'type': 'default',
+              'text': '📋 Скопировать ссылку'
+            },
+            {
+              'id': 'show_link',
+              'type': 'default',
+              'text': '🔗 Показать ссылку'
+            },
+            {
+              'id': 'share_text',
+              'type': 'default',
+              'text': '📤 Поделиться текстом'
+            },
+            {
+              'id': 'cancel',
+              'type': 'cancel',
+              'text': '❌ Отмена'
+            }
+          ],
+        );
 
-      if (messageId == null) {
-        throw Exception('Не удалось создать подготовленное сообщение');
-      }
-
-      // Отправляем сообщение через shareMessage
-      final success = await shareMessage(messageId!, callback: (bool sent) {
-        if (sent) {
-          print('Сообщение успешно отправлено!');
-        } else {
-          print('Пользователь отменил отправку');
+        if (result != null) {
+          switch (result['button_id']) {
+            case 'copy_link':
+              return await copyToClipboard(referralLink);
+            case 'show_link':
+              showAlert('Ссылка для приглашения:\n\n$referralLink\n\nСкопируйте эту ссылку и отправьте друзьям!');
+              return true;
+            case 'share_text':
+              return await copyToClipboard(inviteText);
+            default:
+              return false;
+          }
         }
-      });
-
-      return success;
+        return false;
+      }
     } catch (e) {
       print('Error inviting friends with share: $e');
+      showAlert('Откройте приложение в Telegram для использования этой функции!');
+      return false;
+    }
+  }
+
+  // Метод для отправки текста в Telegram
+  static Future<bool> _shareTextToTelegram(String text) async {
+    try {
+      // Используем Telegram Web App API для отправки сообщения
+      final webApp = js.context['Telegram']['WebApp'];
+      
+      // Показываем popup с текстом для копирования
+      final result = await webApp.callMethod('showPopup', [{
+        'title': 'Текст для отправки',
+        'message': 'Скопируйте этот текст и отправьте друзьям:',
+        'buttons': [
+          {
+            'id': 'copy_text',
+            'type': 'default',
+            'text': '📋 Скопировать текст'
+          },
+          {
+            'id': 'cancel',
+            'type': 'cancel',
+            'text': '❌ Отмена'
+          }
+        ]
+      }]);
+
+      if (result != null && result['button_id'] == 'copy_text') {
+        return await copyToClipboard(text);
+      }
+      
+      return false;
+    } catch (e) {
+      print('Error sharing text to Telegram: $e');
+      return false;
+    }
+  }
+
+  // Fallback метод для показа опций поделиться
+  static Future<bool> _showFallbackShareOptions(String? userId) async {
+    try {
+      final referralLink = "https://t.me/FSRUBOT?start=ref${userId ?? 'user'}";
+      
+      // Простой fallback - показываем ссылку в alert
+      showAlert('Ссылка для приглашения друзей:\n\n$referralLink\n\nСкопируйте эту ссылку и отправьте друзьям!');
+      return true;
+    } catch (e) {
+      print('Error showing fallback share options: $e');
       return false;
     }
   }

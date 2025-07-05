@@ -199,7 +199,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     fontWeight: FontWeight.w300, // тонкий шрифт
                   ),
                 ),
-                const SizedBox(height: 5), // отступ снизу до слайдера 5мм
+                const SizedBox(height: 15), // отступ снизу до слайдера увеличен в 3 раза (было 5, стало 15)
                 Listener(
                   onPointerMove: (event) {
                     final box = context.findRenderObject() as RenderBox;

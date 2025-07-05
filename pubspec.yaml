@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
   slide_to_act: any
   url_launcher: ^6.2.6
+  video_player: ^2.8.3
 
 dev_dependencies:
   flutter_test:
@@ -29,6 +30,7 @@ flutter:
     - assets/avatar6.png
     - assets/center_memoji.png
     - assets/giveaway_banner.png
+    - assets/giveaway_back_banner.png
     - assets/master_detail_banner.png
     - assets/master_cloud_banner.png
     - assets/master_cloud_banner1.png
@@ -46,6 +48,7 @@ flutter:
     - assets/work2.png
     - assets/master_detail_back_banner.png
     - assets/master_detail_logo_banner.png
+    - assets/FSR.mp4
 
   fonts:
     - family: OpenSans

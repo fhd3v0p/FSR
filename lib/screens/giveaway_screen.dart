@@ -3,6 +3,7 @@ import 'role_selection_screen.dart';
 import 'invite_friends_screen.dart';
 import 'dart:async';
 import 'package:url_launcher/url_launcher.dart';
+import '../services/telegram_webapp_service.dart';
 
 
 class GiveawayScreen extends StatefulWidget {
@@ -143,27 +144,38 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
           Positioned.fill(
             child: Stack(
               children: [
-                Image.asset(
-                  'assets/giveaway_back_banner.png',
-                  width: double.infinity,
-                  height: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-                // Мэйн баннер опущен вниз на 20% экрана
-                Positioned(
-                  top: MediaQuery.of(context).size.height * 0.20,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
+                // Фоновый баннер на весь экран
+                Positioned.fill(
                   child: Image.asset(
-                    'assets/giveaway_banner.png',
+                    'assets/giveaway_back_banner.png',
                     width: double.infinity,
                     height: double.infinity,
                     fit: BoxFit.cover,
                   ),
                 ),
+                // Мэйн баннер увеличен на 13% и поднят вверх на 5% экрана
+                Positioned.fill(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final height = constraints.maxHeight;
+                      return Transform.translate(
+                        offset: Offset(0, -height * 0.05), // Поднимаем вверх на 5% (было 10%)
+                        child: Transform.scale(
+                          scale: 1.13,
+                          alignment: Alignment.center,
+                          child: Image.asset(
+                            'assets/giveaway_banner.png',
+                            fit: BoxFit.contain,
+                            alignment: Alignment.center,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                // Возвращаем затемнение до 25%
                 Container(
-                  color: Colors.black.withOpacity(0.25),
+                  color: Colors.black.withOpacity(0.25), // вернули к 25%
                 ),
               ],
             ),
@@ -213,99 +225,121 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                 ),
                 const SizedBox(height: 8), // минимальный отступ до следующего блока
                 const Spacer(), // Всё что ниже таймера — уходит вниз
-                // Кнопка "Подарки"
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: GestureDetector(
-                    onTap: () {
-                      _showPrizesDialog();
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFF6EC7).withOpacity(0.2),
-                        border: Border.all(color: const Color(0xFFFF6EC7), width: 2),
+                // Опускаем все блоки максимально вниз
+                Column(
+                  children: [
+                                          // Кнопка "Подарки"
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 3), // Уменьшили с 8 на 3 (в 3 раза)
+                      child: GestureDetector(
+                        onTap: () {
+                          _showPrizesDialog();
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFF6EC7).withOpacity(0.2),
+                            border: Border.all(color: const Color(0xFFFF6EC7), width: 2),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.card_giftcard, color: Colors.white, size: 24),
+                              const SizedBox(width: 12),
+                              const Text(
+                                'Подарки',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'NauryzKeds',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                    ),
+                    // Список заданий и кнопка
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                      child: Column(
                         children: [
-                          const Icon(Icons.card_giftcard, color: Color(0xFFFF6EC7), size: 24),
-                          const SizedBox(width: 12),
-                          const Text(
-                            'Подарки',
-                            style: TextStyle(
-                              color: Color(0xFFFF6EC7),
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'NauryzKeds',
-                            ),
+                          _TaskTile(
+                            title: 'Подписаться на Telegram-папку',
+                            subtitle: '10 каналов одним кликом\n+1000 XP',
+                            icon: Icons.folder_special,
+                            onTap: () async {
+                              const url = 'https://t.me/addlist/f3YaeLmoNsdkYjVl';
+                              if (await canLaunchUrl(Uri.parse(url))) {
+                                await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                              }
+                              setState(() {
+                                _task1Done = true;
+                              });
+                            },
+                            done: _task1Done,
+                            taskNumber: 1,
+                            completedTasks: (_task1Done ? 1 : 0) + (_task2Done ? 1 : 0),
+                          ),
+                          _TaskTile(
+                            title: 'Пригласить друзей',
+                            subtitle: 'За каждого друга: +100 XP',
+                            icon: Icons.person_add_alt_1,
+                            onTap: () async {
+                              // Показываем индикатор загрузки
+                              setState(() {
+                                _task2Done = false;
+                              });
+                              
+                              // Открываем Telegram share popup
+                              final success = await TelegramWebAppService.inviteFriendsWithShare();
+                              
+                              if (success) {
+                                setState(() {
+                                  _task2Done = true;
+                                });
+                                // Показываем уведомление об успехе
+                                TelegramWebAppService.showAlert('Отлично!');
+                              } else {
+                                // Показываем уведомление об ошибке
+                                TelegramWebAppService.showAlert('Не удалось открыть диалог. Попробуйте еще раз.');
+                              }
+                            },
+                            done: _task2Done,
+                            taskNumber: 2,
+                            completedTasks: (_task1Done ? 1 : 0) + (_task2Done ? 1 : 0),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                ),
-                // Список заданий и кнопка
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                  child: Column(
-                    children: [
-                      _TaskTile(
-                        title: 'Подписаться на Telegram-папку',
-                        subtitle: '10 каналов одним кликом\n+1000 XP',
-                        icon: Icons.folder_special,
-                        onTap: () async {
-                          const url = 'https://t.me/addlist/f3YaeLmoNsdkYjVl';
-                          if (await canLaunchUrl(Uri.parse(url))) {
-                            await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                          }
-                          setState(() {
-                            _task1Done = true;
-                          });
-                        },
-                        done: _task1Done,
-                      ),
-                      _TaskTile(
-                        title: 'Пригласить друзей',
-                        subtitle: 'За каждого друга: +100 XP',
-                        icon: Icons.person_add_alt_1,
-                        onTap: () {
-                          // Открываем экран приглашения друзей
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => const InviteFriendsScreen(),
-                            ),
-                          );
-                          setState(() {
-                            _task2Done = true;
-                          });
-                        },
-                        done: _task2Done,
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: GradientButton(
-                    text: 'Перейти в приложение',
-                    onTap: () {
-                      Navigator.of(context).pushReplacement(
-                        PageRouteBuilder(
-                          pageBuilder: (_, __, ___) => const RoleSelectionScreen(),
-                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                            return FadeTransition(
-                              opacity: animation,
-                              child: child,
+                    const SizedBox(height: 5), // Уменьшили с 16 на 5 (в 3 раза)
+                    Transform.translate(
+                      offset: Offset(0, -MediaQuery.of(context).size.height * 0.05), // Поднимаем на 5% вверх
+                      child: Padding(
+                        padding: const EdgeInsets.all(16), // Возвращаем стандартный padding 16px
+                        child: GradientButton(
+                          text: allTasksDone ? 'Перейти в приложение' : 'Выполните задания',
+                          onTap: () {
+                            Navigator.of(context).pushReplacement(
+                              PageRouteBuilder(
+                                pageBuilder: (_, __, ___) => const RoleSelectionScreen(),
+                                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  );
+                                },
+                                transitionDuration: const Duration(milliseconds: 350),
+                              ),
                             );
                           },
-                          transitionDuration: const Duration(milliseconds: 350),
+                          enabled: allTasksDone, // Активна только после выполнения всех заданий
                         ),
-                      );
-                    },
-                    enabled: true, // Всегда активна для тестирования
-                  ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -316,13 +350,15 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
   }
 }
 
-// Измените _TaskTile, чтобы он показывал галочку при выполнении:
+// Измените _TaskTile, чтобы он показывал счетчик при выполнении:
 class _TaskTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
   final VoidCallback onTap;
   final bool done;
+  final int taskNumber;
+  final int completedTasks;
 
   const _TaskTile({
     required this.title,
@@ -330,12 +366,14 @@ class _TaskTile extends StatelessWidget {
     required this.icon,
     required this.onTap,
     required this.done,
+    required this.taskNumber,
+    required this.completedTasks,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 3), // Уменьшили с 8 на 3 (в 3 раза)
       decoration: BoxDecoration(
         color: Colors.grey[900]!.withOpacity(0.7),
         // Убрали borderRadius
@@ -370,8 +408,38 @@ class _TaskTile extends StatelessWidget {
               ),
             ),
             trailing: done
-                ? const Icon(Icons.check_circle, color: Colors.green)
-                : Icon(Icons.chevron_right, color: Colors.white.withOpacity(0.7)),
+                ? Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.2),
+                      border: Border.all(color: Colors.green),
+                    ),
+                    child: Text(
+                      '$completedTasks/2',
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontFamily: 'NauryzKeds',
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )
+                : Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      border: Border.all(color: Colors.white.withOpacity(0.3)),
+                    ),
+                    child: Text(
+                      '0/2',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontFamily: 'NauryzKeds',
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
           ),
         ),
       ),

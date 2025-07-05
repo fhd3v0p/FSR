@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FSR WebApp Test</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .status {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .button {
+            background: #0088cc;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .button:hover {
+            background: #006699;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 FSR WebApp Test</h1>
+        
+        <div class="status" id="status">
+            <h3>Статус загрузки...</h3>
+        </div>
+        
+        <button class="button" onclick="testWebApp()">Тест WebApp</button>
+        <button class="button" onclick="showAlert()">Показать Alert</button>
+        <button class="button" onclick="getUserData()">Получить данные пользователя</button>
+    </div>
+
+    <script>
+        let tg = null;
+        
+        function updateStatus(message, isError = false) {
+            const status = document.getElementById('status');
+            status.innerHTML = `<h3 style="color: ${isError ? '#ff6b6b' : '#51cf66'}">${message}</h3>`;
+        }
+        
+        function initWebApp() {
+            try {
+                // Проверяем, доступен ли Telegram Web App
+                if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+                    tg = Telegram.WebApp;
+                    
+                    // Инициализируем Web App
+                    tg.ready();
+                    
+                    // Настраиваем тему
+                    tg.expand();
+                    
+                    updateStatus('✅ Telegram Web App инициализирован успешно!');
+                    
+                    // Показываем информацию о пользователе
+                    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                        const user = tg.initDataUnsafe.user;
+                        updateStatus(`👤 Пользователь: ${user.first_name || 'Неизвестно'}<br>🆔 ID: ${user.id || 'Неизвестно'}`);
+                    } else {
+                        updateStatus('⚠️ Данные пользователя недоступны');
+                    }
+                    
+                } else {
+                    updateStatus('❌ Telegram Web App недоступен. Запустите в Telegram!', true);
+                }
+            } catch (error) {
+                updateStatus(`❌ Ошибка инициализации: ${error.message}`, true);
+            }
+        }
+        
+        function testWebApp() {
+            if (!tg) {
+                updateStatus('❌ Web App не инициализирован!', true);
+                return;
+            }
+            
+            try {
+                // Тестируем основные методы
+                tg.showAlert('Тест Web App работает! 🎉');
+                updateStatus('✅ Тест Web App прошел успешно!');
+            } catch (error) {
+                updateStatus(`❌ Ошибка теста: ${error.message}`, true);
+            }
+        }
+        
+        function showAlert() {
+            if (!tg) {
+                alert('Web App не инициализирован!');
+                return;
+            }
+            
+            try {
+                tg.showAlert('Привет из FSR! 🚀');
+            } catch (error) {
+                alert(`Ошибка: ${error.message}`);
+            }
+        }
+        
+        function getUserData() {
+            if (!tg) {
+                updateStatus('❌ Web App не инициализирован!', true);
+                return;
+            }
+            
+            try {
+                const user = tg.initDataUnsafe?.user;
+                if (user) {
+                    const userInfo = `
+👤 <b>Данные пользователя:</b><br>
+• Имя: ${user.first_name || 'Не указано'}<br>
+• Фамилия: ${user.last_name || 'Не указана'}<br>
+• Username: @${user.username || 'Не указан'}<br>
+• ID: ${user.id || 'Не указан'}<br>
+• Язык: ${user.language_code || 'Не указан'}
+                    `;
+                    tg.showAlert(userInfo);
+                } else {
+                    tg.showAlert('Данные пользователя недоступны');
+                }
+            } catch (error) {
+                updateStatus(`❌ Ошибка получения данных: ${error.message}`, true);
+            }
+        }
+        
+        // Инициализируем при загрузке страницы
+        window.addEventListener('load', initWebApp);
+    </script>
+</body>
+</html> 
