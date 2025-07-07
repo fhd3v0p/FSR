@@ -78,13 +78,6 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        title: Text(
-          'Masters in ${widget.city}',
-          style: const TextStyle(fontFamily: 'NauryzKeds'),
-        ),
-        backgroundColor: Colors.black,
-      ),
       body: Stack(
         children: [
           Positioned.fill(
@@ -98,110 +91,123 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
               color: Colors.black.withOpacity(0.18),
             ),
           ),
-          Column(
-            children: [
-              SizedBox(
-                height: 72,
-                child: ListView.builder(
-                  controller: _scrollController,
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  itemCount: MasterCloudScreen.categories.length,
-                  itemBuilder: (context, index) {
-                    final cat = MasterCloudScreen.categories[index];
-                    final isSelected = selectedCategory == cat;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() => selectedCategory = cat);
-                          _pauseAutoScroll();
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          decoration: BoxDecoration(
-                            color: isSelected ? Colors.white : Colors.transparent,
-                            borderRadius: BorderRadius.circular(30),
-                            border: Border.all(color: Colors.white),
-                          ),
-                          child: Center(
-                            child: Text(
-                              cat,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: isSelected ? Colors.black : Colors.white,
-                                fontFamily: 'NauryzKeds',
-                                fontSize: 20,
-                                height: 1.2,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 1.2,
+          // Кнопка назад
+          Positioned(
+            top: 36,
+            left: 12,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28),
+              onPressed: () => Navigator.of(context).maybePop(),
+              splashRadius: 24,
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                const SizedBox(height: 64), // Было 48, увеличил чтобы не перекрывать стрелку
+                SizedBox(
+                  height: 72,
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    itemCount: MasterCloudScreen.categories.length,
+                    itemBuilder: (context, index) {
+                      final cat = MasterCloudScreen.categories[index];
+                      final isSelected = selectedCategory == cat;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() => selectedCategory = cat);
+                            _pauseAutoScroll();
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            decoration: BoxDecoration(
+                              color: isSelected ? Colors.white : Colors.transparent,
+                              borderRadius: BorderRadius.circular(30),
+                              border: Border.all(color: Colors.white),
+                            ),
+                            child: Center(
+                              child: Text(
+                                cat,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: isSelected ? Colors.black : Colors.white,
+                                  fontFamily: 'NauryzKeds',
+                                  fontSize: 20,
+                                  height: 1.2,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 1.2,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  child: GridView.builder(
-                    clipBehavior: Clip.none,
-                    itemCount: masters.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 0.75,
-                    ),
-                    itemBuilder: (context, i) {
-                      final m = masters[i];
-                      return GestureDetector(
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => MasterDetailScreen(master: m),
-                          ),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 2),
-                              ),
-                              child: CircleAvatar(
-                                backgroundImage: AssetImage(m.avatar),
-                                radius: avatarSize / 2.3,
-                                backgroundColor: Colors.black.withOpacity(0.5), // Полупрозрачный фон
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              m.name,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'NauryzKeds',
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
                         ),
                       );
                     },
                   ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    child: GridView.builder(
+                      clipBehavior: Clip.none,
+                      itemCount: masters.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        childAspectRatio: 0.75,
+                      ),
+                      itemBuilder: (context, i) {
+                        final m = masters[i];
+                        return GestureDetector(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => MasterDetailScreen(master: m),
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white, width: 2),
+                                ),
+                                child: CircleAvatar(
+                                  backgroundImage: AssetImage(m.avatar),
+                                  radius: avatarSize / 2.3,
+                                  backgroundColor: Colors.black.withOpacity(0.5), // Полупрозрачный фон
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                m.name,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'NauryzKeds',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

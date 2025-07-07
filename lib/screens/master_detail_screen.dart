@@ -71,20 +71,22 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
               alignment: Alignment.topCenter,
             ),
           ),
+          // Кнопка назад
+          Positioned(
+            top: 43,
+            left: 12,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28),
+              onPressed: () => Navigator.of(context).pop(),
+              splashRadius: 24,
+            ),
+          ),
           // --- КОНТЕНТ (dark boxes) ---
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- КНОПКА НАЗАД ---
-                Padding(
-                  padding: const EdgeInsets.only(left: 8, top: 8, bottom: 4),
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28),
-                    onPressed: () => Navigator.of(context).pop(),
-                    splashRadius: 24,
-                  ),
-                ),
+                const SizedBox(height: 48), // Отступ для кнопки назад
                 // --- ВЕРХНЯЯ ТЁМНАЯ РАМКА с соцсетями и кнопкой ---
                 Container(
                   margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),

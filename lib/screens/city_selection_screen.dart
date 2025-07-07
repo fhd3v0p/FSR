@@ -81,19 +81,20 @@ class _CitySelectionScreenState extends State<CitySelectionScreen> with SingleTi
               color: Colors.black.withOpacity(0.18),
             ),
           ),
+          // Кнопка назад
+          Positioned(
+            top: 36,
+            left: 12,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28),
+              onPressed: () => Navigator.of(context).maybePop(),
+              splashRadius: 24,
+            ),
+          ),
           SafeArea(
             child: Column(
               children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white.withOpacity(0.7)),
-                    onPressed: () => Navigator.of(context).maybePop(),
-                    splashRadius: 24,
-                    tooltip: 'Назад',
-                  ),
-                ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 48), // Отступ для кнопки назад
                 Expanded(
                   child: Stack(
                     children: _cities.map((city) {

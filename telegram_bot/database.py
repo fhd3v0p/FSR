@@ -103,6 +103,19 @@ class Database:
             )
         ''')
 
+        # --- Новая таблица для каналов ---
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS giveaway_channels (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                channel_id INTEGER NOT NULL,
+                username TEXT
+            )
+        ''')
+        # Добавляем тестовый канал, если его нет
+        cursor.execute('SELECT COUNT(*) FROM giveaway_channels WHERE channel_id = ?', (-1001973736826,))
+        if cursor.fetchone()[0] == 0:
+            cursor.execute('INSERT INTO giveaway_channels (channel_id, username) VALUES (?, ?)', (-1001973736826, 'F_S_R_US'))
+
         conn.commit()
         conn.close()
 
@@ -119,11 +132,11 @@ class Database:
         if cursor.fetchone()[0] == 0:
             prizes = [
                 {
-                    'name': 'Сертификат в ZARA',
-                    'description': 'Сертификат на покупки в ZARA на сумму 20,000 рублей',
+                    'name': 'Сертификат Золотое Яблоко',
+                    'description': 'Сертификат на покупки в Золотом Яблоке на сумму 20,000 рублей',
                     'value': 20000,
                     'category': 'certificate',
-                    'image_url': 'assets/zara_certificate.png'
+                    'image_url': 'assets/golden_apple_certificate.png'
                 },
                 {
                     'name': 'Бьюти-услуги',
@@ -133,11 +146,11 @@ class Database:
                     'image_url': 'assets/beauty_services.png'
                 },
                 {
-                    'name': 'VIP-статус',
-                    'description': 'Приоритетный доступ к новым артистам и эксклюзивным предложениям',
+                    'name': 'Telegram Premium (3 мес)',
+                    'description': '3 Telegram Premium на 3 месяца',
                     'value': 50000,
-                    'category': 'vip_status',
-                    'image_url': 'assets/vip_status.png'
+                    'category': 'telegram_premium',
+                    'image_url': 'assets/telegram_premium.png'
                 }
             ]
 
@@ -201,11 +214,17 @@ class Database:
             cursor = conn.cursor()
 
             # Находим пользователя, который пригласил
-            cursor.execute("SELECT user_id FROM users WHERE referral_code = ?", (referral_code,))
+            cursor.execute("SELECT user_id, first_name FROM users WHERE referral_code = ?", (referral_code,))
             result = cursor.fetchone()
             
             if result:
                 inviter_id = result[0]
+                inviter_name = result[1] or "Неизвестно"
+                
+                # Получаем имя приглашенного пользователя
+                cursor.execute("SELECT first_name FROM users WHERE user_id = ?", (new_user_id,))
+                invitee_result = cursor.fetchone()
+                invitee_name = invitee_result[0] if invitee_result else "Неизвестно"
                 
                 # Обновляем статистику пригласившего
                 cursor.execute('''
@@ -225,6 +244,16 @@ class Database:
                 # Добавляем активность
                 self.add_activity(inviter_id, "referral_success", f"Пригласил пользователя {new_user_id}")
                 self.add_activity(new_user_id, "referred_by", f"Приглашен пользователем {inviter_id}")
+
+                # Логируем приглашение в Telegram (асинхронно)
+                try:
+                    import asyncio
+                    from logger import telegram_logger
+                    asyncio.create_task(telegram_logger.log_friend_invitation(
+                        inviter_id, inviter_name, new_user_id, invitee_name, referral_code
+                    ))
+                except Exception as log_error:
+                    print(f"Error logging referral: {log_error}")
 
             conn.commit()
             conn.close()
@@ -273,6 +302,33 @@ class Database:
             return None
         except Exception as e:
             print(f"Error getting referral link: {e}")
+            return None
+
+    def get_user_by_referral_code(self, referral_code: str) -> Optional[Dict[str, Any]]:
+        """Получение пользователя по реферальному коду"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT user_id, username, first_name, last_name, referral_code
+                FROM users WHERE referral_code = ?
+            """, (referral_code,))
+            
+            result = cursor.fetchone()
+            conn.close()
+
+            if result:
+                return {
+                    'user_id': result[0],
+                    'username': result[1],
+                    'first_name': result[2],
+                    'last_name': result[3],
+                    'referral_code': result[4]
+                }
+            return None
+        except Exception as e:
+            print(f"Error getting user by referral code: {e}")
             return None
 
     def get_giveaway_prizes(self) -> List[Dict[str, Any]]:
@@ -324,6 +380,125 @@ class Database:
             conn.close()
         except Exception as e:
             print(f"Error adding activity: {e}")
+    
+    def complete_task(self, user_id: int, task_name: str, task_number: int):
+        """Отметить выполнение задания пользователем"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            # Получаем информацию о пользователе
+            cursor.execute("SELECT username, first_name FROM users WHERE user_id = ?", (user_id,))
+            user_result = cursor.fetchone()
+            
+            if user_result:
+                username = user_result[0] or "Не указан"
+                first_name = user_result[1] or "Неизвестно"
+                
+                # Обновляем количество выполненных заданий
+                cursor.execute('''
+                    UPDATE users 
+                    SET tasks_completed = tasks_completed + 1
+                    WHERE user_id = ?
+                ''', (user_id,))
+                
+                # Проверяем, завершил ли пользователь гивевей
+                cursor.execute("SELECT tasks_completed, total_referral_xp FROM users WHERE user_id = ?", (user_id,))
+                result = cursor.fetchone()
+                
+                if result and result[0] >= 2:  # Все задания выполнены
+                    cursor.execute('''
+                        UPDATE users 
+                        SET giveaway_completed = 1
+                        WHERE user_id = ?
+                    ''', (user_id,))
+                    
+                    # Логируем завершение гивевея
+                    try:
+                        import asyncio
+                        from logger import telegram_logger
+                        asyncio.create_task(telegram_logger.log_giveaway_completion(
+                            user_id, username, first_name, result[1] or 0
+                        ))
+                    except Exception as log_error:
+                        print(f"Error logging giveaway completion: {log_error}")
+                
+                # Логируем выполнение задания
+                try:
+                    import asyncio
+                    from logger import telegram_logger
+                    asyncio.create_task(telegram_logger.log_task_completion(
+                        user_id, username, first_name, task_name, task_number
+                    ))
+                except Exception as log_error:
+                    print(f"Error logging task completion: {log_error}")
+                
+                # Добавляем активность
+                self.add_activity(user_id, "task_completed", f"Выполнил задание: {task_name}")
+            
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"Error completing task: {e}")
+    
+    def log_referral_stats(self, user_id: int):
+        """Логировать реферальную статистику пользователя"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute("SELECT username, first_name, referral_count, total_referral_xp FROM users WHERE user_id = ?", (user_id,))
+            result = cursor.fetchone()
+            
+            if result:
+                username = result[0] or "Не указан"
+                first_name = result[1] or "Неизвестно"
+                referral_count = result[2] or 0
+                total_xp = result[3] or 0
+                
+                # Логируем реферальную статистику
+                try:
+                    import asyncio
+                    from logger import telegram_logger
+                    asyncio.create_task(telegram_logger.log_referral_stats(
+                        user_id, username, first_name, referral_count, total_xp
+                    ))
+                except Exception as log_error:
+                    print(f"Error logging referral stats: {log_error}")
+            
+            conn.close()
+        except Exception as e:
+            print(f"Error logging referral stats: {e}")
+
+    def log_folder_subscription(self, user_id: int):
+        """Логировать подписку на папку с каналами"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute("SELECT username, first_name FROM users WHERE user_id = ?", (user_id,))
+            result = cursor.fetchone()
+            
+            if result:
+                username = result[0] or "Не указан"
+                first_name = result[1] or "Неизвестно"
+                
+                # Логируем подписку на папку
+                try:
+                    import asyncio
+                    from logger import telegram_logger
+                    asyncio.create_task(telegram_logger.log_folder_subscription(
+                        user_id, username, first_name
+                    ))
+                except Exception as log_error:
+                    print(f"Error logging folder subscription: {log_error}")
+                
+                # Добавляем активность
+                self.add_activity(user_id, "folder_subscription", "Подписался на папку с каналами")
+            
+            conn.close()
+        except Exception as e:
+            print(f"Error logging folder subscription: {e}")
 
     def get_user_stats(self, user_id: int) -> Dict[str, Any]:
         """Получение статистики пользователя"""
@@ -469,3 +644,53 @@ class Database:
         except Exception as e:
             print(f"Error getting photo stats: {e}")
             return {'totalUploads': 0, 'categoryStats': {}, 'recentUploads': 0} 
+
+    def add_ticket_for_referral_start(self, inviter_id: int, invitee_id: int) -> bool:
+        """Начисляет 1 билет пригласившему, если друг стартует по реф-ссылке (только 1 раз за invitee)"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            # Проверяем, не начислен ли уже билет за этого invitee
+            cursor.execute('''
+                SELECT COUNT(*) FROM referral_invites WHERE inviter_id = ? AND invitee_id = ?
+            ''', (inviter_id, invitee_id))
+            if cursor.fetchone()[0] > 0:
+                conn.close()
+                return False  # Уже начислен
+            # Добавляем запись о приглашении
+            cursor.execute('''
+                INSERT INTO referral_invites (inviter_id, invitee_id, invite_code, status, joined_at)
+                VALUES (?, ?, '', 'joined', CURRENT_TIMESTAMP)
+            ''', (inviter_id, invitee_id))
+            # Увеличиваем счетчик билетов (referral_count)
+            cursor.execute('''
+                UPDATE users SET referral_count = referral_count + 1 WHERE user_id = ?
+            ''', (inviter_id,))
+            conn.commit()
+            conn.close()
+            return True
+        except Exception as e:
+            print(f"Error adding ticket for referral start: {e}")
+            return False
+
+    def get_user_tickets(self, user_id: int) -> int:
+        """Возвращает количество билетов пользователя (1 за подписку + 1 за каждого друга)"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            # Проверяем подписку (1 билет если giveaway_participants есть)
+            cursor.execute('''
+                SELECT COUNT(*) FROM giveaway_participants WHERE user_id = ?
+            ''', (user_id,))
+            base_ticket = 1 if cursor.fetchone()[0] > 0 else 0
+            # Считаем друзей по рефке
+            cursor.execute('''
+                SELECT referral_count FROM users WHERE user_id = ?
+            ''', (user_id,))
+            ref_count = cursor.fetchone()
+            ref_count = ref_count[0] if ref_count else 0
+            conn.close()
+            return base_ticket + ref_count
+        except Exception as e:
+            print(f"Error getting user tickets: {e}")
+            return 0 

@@ -6,6 +6,9 @@ import os
 import base64
 from datetime import datetime
 import logging
+import asyncio
+from aiogram import Bot
+from config import BOT_TOKEN
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -315,6 +318,210 @@ def create_prepared_message():
     except Exception as e:
         logger.error(f"Error creating prepared message: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/log-task-completion', methods=['POST'])
+def log_task_completion():
+    """API endpoint для логирования выполнения заданий"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        # Проверяем обязательные поля
+        required_fields = ['user_id', 'task_name', 'task_number']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+        
+        user_id = int(data['user_id'])
+        task_name = data['task_name']
+        task_number = int(data['task_number'])
+        
+        # Используем базу данных для логирования
+        from database import Database
+        db = Database()
+        db.complete_task(user_id, task_name, task_number)
+        
+        logger.info(f"Task completed: user_id={user_id}, task={task_name}, number={task_number}")
+        return jsonify({
+            'success': True,
+            'message': 'Task completion logged successfully'
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error logging task completion: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/log-referral-stats', methods=['POST'])
+def log_referral_stats():
+    """API endpoint для логирования реферальной статистики"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        if 'user_id' not in data:
+            return jsonify({'error': 'Missing user_id field'}), 400
+        
+        user_id = int(data['user_id'])
+        
+        # Используем базу данных для логирования
+        from database import Database
+        db = Database()
+        db.log_referral_stats(user_id)
+        
+        logger.info(f"Referral stats logged: user_id={user_id}")
+        return jsonify({
+            'success': True,
+            'message': 'Referral stats logged successfully'
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error logging referral stats: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/log-folder-subscription', methods=['POST'])
+def log_folder_subscription():
+    """API endpoint для логирования подписки на папку с каналами"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        if 'user_id' not in data:
+            return jsonify({'error': 'Missing user_id field'}), 400
+        
+        user_id = int(data['user_id'])
+        
+        # Используем базу данных для логирования
+        from database import Database
+        db = Database()
+        db.log_folder_subscription(user_id)
+        
+        logger.info(f"Folder subscription logged: user_id={user_id}")
+        return jsonify({
+            'success': True,
+            'message': 'Folder subscription logged successfully'
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error logging folder subscription: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/check-subscription', methods=['POST'])
+def check_subscription():
+    """Проверка подписки пользователя на все каналы из giveaway_channels"""
+    try:
+        data = request.get_json()
+        user_id = int(data.get('user_id'))
+        username = data.get('username')
+        
+        from database import Database
+        db = Database()
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute('SELECT channel_id FROM giveaway_channels')
+        channels = [row[0] for row in cursor.fetchall()]
+        conn.close()
+        
+        bot = Bot(token=BOT_TOKEN)
+        is_subscribed = False
+        for channel_id in channels:
+            try:
+                member = asyncio.run(bot.get_chat_member(chat_id=channel_id, user_id=user_id))
+                if member.status in ['member', 'administrator', 'creator']:
+                    is_subscribed = True
+                    break
+            except Exception as e:
+                continue
+        return jsonify({'subscribed': is_subscribed}), 200
+    except Exception as e:
+        logger.error(f"Error checking subscription: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/user/<user_id>/tickets', methods=['GET'])
+def get_user_tickets(user_id):
+    """Получение количества билетов пользователя"""
+    try:
+        from database import Database
+        db = Database()
+        user_id = int(user_id)
+        # Проверяем подписку
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute('SELECT channel_id FROM giveaway_channels')
+        channels = [row[0] for row in cursor.fetchall()]
+        conn.close()
+        bot = Bot(token=BOT_TOKEN)
+        is_subscribed = False
+        for channel_id in channels:
+            try:
+                member = asyncio.run(bot.get_chat_member(chat_id=channel_id, user_id=user_id))
+                if member.status in ['member', 'administrator', 'creator']:
+                    is_subscribed = True
+                    break
+            except Exception:
+                continue
+        # Считаем друзей по рефке
+        ref_info = db.get_user_referral_info(user_id)
+        tickets = (1 if is_subscribed else 0) + (ref_info['successful_invites'] if ref_info else 0)
+        username = db.get_user_stats(user_id).get('username', '')
+        return jsonify({'tickets': tickets, 'subscribed': is_subscribed, 'username': username}), 200
+    except Exception as e:
+        logger.error(f"Error getting user tickets: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/check-subscription-by-username', methods=['POST'])
+def check_subscription_by_username():
+    """Проверка подписки пользователя на канал по username"""
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        channel_id = -1001973736826  # Пример: один канал
+        from aiogram import Bot
+        from config import BOT_TOKEN
+        bot = Bot(token=BOT_TOKEN)
+        # Проверяем, что бот админ в канале
+        try:
+            bot_id = asyncio.run(bot.me).id
+            member = asyncio.run(bot.get_chat_member(chat_id=channel_id, user_id=bot_id))
+            if member.status not in ['administrator', 'creator']:
+                return jsonify({'error': 'Bot is not admin in channel', 'admin': False}), 403
+        except Exception as e:
+            return jsonify({'error': f'Bot admin check failed: {e}', 'admin': False}), 500
+        # Проверяем подписку пользователя по username
+        try:
+            # В реальности Telegram API не позволяет искать по username напрямую,
+            # нужен user_id. Здесь пример: ищем среди админов по username.
+            admins = asyncio.run(bot.get_chat_administrators(channel_id))
+            found = False
+            for admin in admins:
+                if admin.user.username and admin.user.username.lower() == username.lower():
+                    found = True
+                    break
+            return jsonify({'subscribed': found, 'admin': True}), 200
+        except Exception as e:
+            return jsonify({'error': f'User check failed: {e}', 'admin': True}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/add-ticket-for-referral', methods=['POST'])
+def add_ticket_for_referral():
+    """API endpoint для начисления билета пригласившему, если друг стартует по реф-ссылке"""
+    try:
+        data = request.get_json()
+        inviter_id = int(data.get('inviter_id'))
+        invitee_id = int(data.get('invitee_id'))
+        from database import Database
+        db = Database()
+        success = db.add_ticket_for_referral_start(inviter_id, invitee_id)
+        tickets = db.get_user_tickets(inviter_id)
+        return jsonify({'success': success, 'tickets': tickets}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     # Инициализируем таблицу при запуске

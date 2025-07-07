@@ -91,7 +91,20 @@ class RoleSelectionScreen extends StatelessWidget {
               ),
             ),
           ),
-    
+          // Стрелка назад должна быть последней в списке children, чтобы быть поверх всего
+          Positioned(
+            top: 55,
+            left: 12,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28),
+              onPressed: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (_) => const GiveawayScreen()),
+                );
+              },
+              splashRadius: 24,
+            ),
+          ),
         ],
       ),
     );

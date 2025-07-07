@@ -103,9 +103,34 @@ async def cmd_start(message: types.Message):
     # Добавляем пользователя в базу данных
     db.add_user(user_id, username, first_name, last_name, referred_by)
     
-    # Логируем действие
+    # Если пользователь пришел по реферальной ссылке — начисляем билет пригласившему
+    if referred_by:
+        try:
+            inviter_id = int(referred_by)
+            invitee_id = user_id
+            db.add_ticket_for_referral_start(inviter_id, invitee_id)
+        except Exception as e:
+            print(f"Error adding ticket for referral: {e}")
+    
+    # Логируем действие с информацией о реферале
+    if referred_by:
+        # Получаем информацию о пригласившем пользователе
+        try:
+            inviter_info = db.get_user_stats(int(referred_by))
+            if inviter_info:
+                inviter_username = inviter_info.get('username', 'без username')
+                inviter_name = inviter_info.get('first_name', 'Неизвестно')
+                inviter_id = inviter_info.get('user_id')
+                ref_info_text = f"Приглашен пользователем: {inviter_name} (@{inviter_username}) ID: {inviter_id}"
+            else:
+                ref_info_text = f"Реферальный код: {referred_by} (пользователь не найден)"
+        except Exception as e:
+            ref_info_text = f"Реферальный код: {referred_by} (ошибка получения данных: {e})"
+    else:
+        ref_info_text = "Пришел без реферальной ссылки"
+    
     asyncio.create_task(telegram_logger.log_user_action(
-        user_id, username, first_name, "start", f"User started bot with ref: {referred_by}"
+        user_id, username, first_name, "start", ref_info_text
     ))
     
     # Создаем клавиатуру
@@ -489,6 +514,17 @@ async def handle_all_messages(message: types.Message):
         reply_markup=get_webapp_keyboard()
     )
 
+async def check_bot_admin_status():
+    channel_id = -1001973736826
+    try:
+        member = await bot.get_chat_member(chat_id=channel_id, user_id=(await bot.me).id)
+        if member.status in ['administrator', 'creator']:
+            logger.info(f"✅ Бот является админом в канале {channel_id}")
+        else:
+            logger.error(f"❌ Бот НЕ админ в канале {channel_id}")
+    except Exception as e:
+        logger.error(f"❌ Ошибка проверки админства бота в канале {channel_id}: {e}")
+
 async def main():
     """Основная функция"""
     logger.info("Запуск FSR Telegram Bot...")
@@ -496,9 +532,18 @@ async def main():
     print(f"🌐 WebApp URL: {WEBAPP_URL}")
     print(f"📁 Giveaway Link: {GIVEAWAY_LINK}")
     print("=" * 50)
-    
+
+    # Проверка админства бота в канале
+    await check_bot_admin_status()
+
     # Устанавливаем команды бота
     await set_bot_commands()
+
+    # Логируем запуск бота в Telegram
+    try:
+        await telegram_logger.log_bot_start()
+    except Exception as e:
+        logger.error(f"Error logging bot start: {e}")
     
     # Запускаем бота
     await dp.start_polling(bot)

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'role_selection_screen.dart';
 import 'invite_friends_screen.dart';
 import 'dart:async';
+import 'dart:convert';
+import 'dart:html' as html;
 import 'package:url_launcher/url_launcher.dart';
 import '../services/telegram_webapp_service.dart';
 
@@ -20,7 +22,13 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
   bool _task1Done = false;
   bool _task2Done = false;
 
+  String? _username;
+  int _tickets = 0;
+
   final DateTime giveawayDate = DateTime(2025, 7, 10, 20, 0, 0); // 10 июля 2025, 20:00
+
+  bool get _isTask1Done => _tickets >= 1; // Подписан на канал (есть 1 билет)
+  bool get _isTask2Done => _tickets > 1; // Есть хотя бы 1 приглашённый друг (2+ билета)
 
   @override
   void initState() {
@@ -29,6 +37,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) {
       _updateTimeLeft();
     });
+    _fetchUserTickets();
   }
 
   void _updateTimeLeft() {
@@ -41,6 +50,29 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
     });
   }
 
+  Future<void> _fetchUserTickets() async {
+    try {
+      final userId = TelegramWebAppService.getUserId();
+      if (userId == null) return;
+      final response = await html.HttpRequest.request(
+        'https://fsr.agency/api/user/$userId/tickets',
+        method: 'GET',
+        requestHeaders: {
+          'Content-Type': 'application/json',
+        },
+      );
+      if (response.status == 200) {
+        final data = jsonDecode(response.responseText ?? '{}');
+        setState(() {
+          _tickets = data['tickets'] ?? 0;
+          _username = data['username'] ?? '';
+        });
+      }
+    } catch (e) {
+      print('Error fetching tickets: $e');
+    }
+  }
+
   @override
   void dispose() {
     _timer.cancel();
@@ -50,6 +82,52 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
   String _formatDuration(Duration d) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     return "${d.inHours.remainder(24)}:${twoDigits(d.inMinutes.remainder(60))}:${twoDigits(d.inSeconds.remainder(60))}";
+  }
+
+  Future<void> _logTaskCompletion(String userId, String taskName, int taskNumber) async {
+    try {
+      // Отправляем запрос на сервер для логирования
+      final response = await html.HttpRequest.request(
+        'https://fsr.agency/api/log-task-completion',
+        method: 'POST',
+        sendData: jsonEncode({
+          'user_id': userId,
+          'task_name': taskName,
+          'task_number': taskNumber,
+        }),
+        requestHeaders: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.status != 200) {
+        print('Error logging task completion: ${response.status}');
+      }
+    } catch (e) {
+      print('Error logging task completion: $e');
+    }
+  }
+
+  Future<void> _logFolderSubscription(String userId) async {
+    try {
+      // Отправляем запрос на сервер для логирования подписки на папку
+      final response = await html.HttpRequest.request(
+        'https://fsr.agency/api/log-folder-subscription',
+        method: 'POST',
+        sendData: jsonEncode({
+          'user_id': userId,
+        }),
+        requestHeaders: {
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.status != 200) {
+        print('Error logging folder subscription: ${response.status}');
+      }
+    } catch (e) {
+      print('Error logging folder subscription: $e');
+    }
   }
 
   void _showPrizesDialog() {
@@ -71,12 +149,13 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Призы
               _PrizeCard(
-                title: 'Сертификат в ZARA',
-                description: 'Сертификат на покупки в ZARA на сумму 20,000 рублей',
+                title: 'Сертификат Золотое Яблоко',
+                description: 'Сертификат на покупки в Золотом Яблоке на сумму 20,000 рублей',
                 value: '20,000₽',
                 icon: Icons.shopping_bag,
-                color: Colors.blue,
+                color: Colors.orange,
               ),
               const SizedBox(height: 16),
               _PrizeCard(
@@ -88,21 +167,23 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
               ),
               const SizedBox(height: 16),
               _PrizeCard(
-                title: 'VIP-статус',
-                description: 'Приоритетный доступ к новым артистам и эксклюзивным предложениям',
-                value: '50,000₽',
-                icon: Icons.star,
-                color: Colors.amber,
+                title: 'Telegram Premium (3 мес)',
+                description: '3 Telegram Premium на 3 месяца',
+                value: '3,500₽',
+                icon: Icons.telegram,
+                color: Colors.blue,
               ),
               const SizedBox(height: 20),
+              // Общая стоимость призов по центру снизу
               Container(
+                margin: const EdgeInsets.only(bottom: 10),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: const Color(0xFFFF6EC7).withOpacity(0.2),
                   border: Border.all(color: const Color(0xFFFF6EC7)),
                 ),
                 child: const Text(
-                  '🏆 Общая стоимость призов: 170,000₽',
+                  '🏆 Общая стоимость призов: 123,500₽',
                   style: TextStyle(
                     color: Color(0xFFFF6EC7),
                     fontFamily: 'NauryzKeds',
@@ -110,6 +191,62 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                   textAlign: TextAlign.center,
+                ),
+              ),
+              // Условия начисления билетов
+              Container(
+                margin: const EdgeInsets.only(top: 0),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.08),
+                  border: Border.all(color: Colors.white24),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.confirmation_num, color: Color(0xFFFF6EC7), size: 20),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Как получить билеты:',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'NauryzKeds',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('• ', style: TextStyle(color: Colors.white, fontSize: 16)),
+                        Expanded(
+                          child: Text(
+                            '1 билет — за подписку на Telegram-папку (только если реально подписан)',
+                            style: const TextStyle(color: Colors.white, fontFamily: 'OpenSans', fontSize: 15),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('• ', style: TextStyle(color: Colors.white, fontSize: 16)),
+                        Expanded(
+                          child: Text(
+                            '+1 билет — за каждого друга, который стартует бота по вашей реферальной ссылке',
+                            style: const TextStyle(color: Colors.white, fontFamily: 'OpenSans', fontSize: 15),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -134,7 +271,9 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final allTasksDone = _task1Done && _task2Done;
+    final allTasksDone = _tickets >= 1;
+    final task1Done = _isTask1Done;
+    final task2Done = _isTask2Done;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -185,7 +324,8 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(height: MediaQuery.of(context).size.height * 0.10), // 10% экрана отступ сверху
+                // Убираем мини-бейдж с username и билетами
+                SizedBox(height: MediaQuery.of(context).size.height * 0.05 + 50), // Было 0.05, теперь +50px вниз
                 // Бокс для заголовка GIVEAWAY — максимально большой
                 Container(
                   alignment: Alignment.center,
@@ -228,39 +368,52 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                 // Опускаем все блоки максимально вниз
                 Column(
                   children: [
-                                          // Кнопка "Подарки"
+                                          // Кнопка "Подарки" с иконкой билета и количеством билетов
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 3), // Уменьшили с 8 на 3 (в 3 раза)
-                      child: GestureDetector(
-                        onTap: () {
-                          _showPrizesDialog();
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFF6EC7).withOpacity(0.2),
-                            border: Border.all(color: const Color(0xFFFF6EC7), width: 2),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.card_giftcard, color: Colors.white, size: 24),
-                              const SizedBox(width: 12),
-                              const Text(
-                                'Подарки',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'NauryzKeds',
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
+                        child: GestureDetector(
+                          onTap: () {
+                            _showPrizesDialog();
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF6EC7).withOpacity(0.2),
+                              border: Border.all(color: const Color(0xFFFF6EC7), width: 2),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.card_giftcard, color: Colors.white, size: 24),
+                                const SizedBox(width: 12),
+                                const Text(
+                                  'Подарки',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'NauryzKeds',
+                                  ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 18),
+                                // Иконка билета и количество билетов
+                                const Icon(Icons.confirmation_num, color: Color(0xFFFF6EC7), size: 22),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '$_tickets',
+                                  style: const TextStyle(
+                                    color: Color(0xFFFF6EC7),
+                                    fontFamily: 'NauryzKeds',
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
                     // Список заданий и кнопка
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
@@ -278,10 +431,38 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                               setState(() {
                                 _task1Done = true;
                               });
+                              // Проверка подписки на канал
+                              try {
+                                final userId = TelegramWebAppService.getUserId();
+                                if (userId != null) {
+                                  // Проверяем подписку через API
+                                  final response = await html.HttpRequest.request(
+                                    'https://fsr.agency/api/check-subscription',
+                                    method: 'POST',
+                                    sendData: jsonEncode({
+                                      'user_id': userId,
+                                      'username': _username,
+                                    }),
+                                    requestHeaders: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                  );
+                                  final data = jsonDecode(response.responseText ?? '{}');
+                                  if (data['subscribed'] == true) {
+                                    await _logFolderSubscription(userId);
+                                    await _logTaskCompletion(userId, 'Подписаться на Telegram-папку', 1);
+                                    await _fetchUserTickets(); // Обновить счетчик билетов
+                                  } else {
+                                    TelegramWebAppService.showAlert('Пожалуйста, подпишитесь на канал!');
+                                  }
+                                }
+                              } catch (e) {
+                                print('Error checking subscription: $e');
+                              }
                             },
-                            done: _task1Done,
+                            done: task1Done,
                             taskNumber: 1,
-                            completedTasks: (_task1Done ? 1 : 0) + (_task2Done ? 1 : 0),
+                            completedTasks: (task1Done ? 1 : 0) + (task2Done ? 1 : 0),
                           ),
                           _TaskTile(
                             title: 'Пригласить друзей',
@@ -302,41 +483,48 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                                 });
                                 // Показываем уведомление об успехе
                                 TelegramWebAppService.showAlert('Отлично!');
+                                
+                                // Логируем выполнение задания
+                                try {
+                                  final userId = TelegramWebAppService.getUserId();
+                                  if (userId != null) {
+                                    await _logTaskCompletion(userId, 'Пригласить друзей', 2);
+                                  }
+                                } catch (e) {
+                                  print('Error logging task completion: $e');
+                                }
                               } else {
                                 // Показываем уведомление об ошибке
                                 TelegramWebAppService.showAlert('Не удалось открыть диалог. Попробуйте еще раз.');
                               }
                             },
-                            done: _task2Done,
+                            done: task2Done,
                             taskNumber: 2,
-                            completedTasks: (_task1Done ? 1 : 0) + (_task2Done ? 1 : 0),
+                            completedTasks: (task1Done ? 1 : 0) + (task2Done ? 1 : 0),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 5), // Уменьшили с 16 на 5 (в 3 раза)
-                    Transform.translate(
-                      offset: Offset(0, -MediaQuery.of(context).size.height * 0.05), // Поднимаем на 5% вверх
-                      child: Padding(
-                        padding: const EdgeInsets.all(16), // Возвращаем стандартный padding 16px
-                        child: GradientButton(
-                          text: allTasksDone ? 'Перейти в приложение' : 'Выполните задания',
-                          onTap: () {
-                            Navigator.of(context).pushReplacement(
-                              PageRouteBuilder(
-                                pageBuilder: (_, __, ___) => const RoleSelectionScreen(),
-                                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                                  return FadeTransition(
-                                    opacity: animation,
-                                    child: child,
-                                  );
-                                },
-                                transitionDuration: const Duration(milliseconds: 350),
-                              ),
-                            );
-                          },
-                          enabled: allTasksDone, // Активна только после выполнения всех заданий
-                        ),
+                    // Кнопка "Перейти в приложение" прямо под заданиями
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4), // Уменьшили с 8 на 4 (в 2 раза)
+                      child: GradientButton(
+                        text: allTasksDone ? 'Перейти в приложение' : 'Выполните задания',
+                        onTap: () {
+                          Navigator.of(context).pushReplacement(
+                            PageRouteBuilder(
+                              pageBuilder: (_, __, ___) => const RoleSelectionScreen(),
+                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
+                              transitionDuration: const Duration(milliseconds: 350),
+                            ),
+                          );
+                        },
+                        enabled: allTasksDone, // Активна если есть хотя бы 1 билет
                       ),
                     ),
                   ],
@@ -522,6 +710,7 @@ class GradientButton extends StatelessWidget {
   }
 }
 
+// _PrizeCard: value по центру снизу, иконка слева
 class _PrizeCard extends StatelessWidget {
   final String title;
   final String description;
@@ -545,55 +734,63 @@ class _PrizeCard extends StatelessWidget {
         color: Colors.white.withOpacity(0.08),
         border: Border.all(color: color.withOpacity(0.5)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'NauryzKeds',
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.2),
+                  shape: BoxShape.circle,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontFamily: 'NauryzKeds',
-                    fontSize: 14,
-                  ),
+                child: Icon(icon, color: color, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'OpenSans', // OpenSans for title
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontFamily: 'OpenSans', // OpenSans for description
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
-              border: Border.all(color: color),
-            ),
-            child: Text(
-              value,
-              style: TextStyle(
-                color: color,
-                fontFamily: 'NauryzKeds',
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+          const SizedBox(height: 8),
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.18),
+                border: Border.all(color: color),
+              ),
+              child: Text(
+                value,
+                style: TextStyle(
+                  color: color,
+                  fontFamily: 'NauryzKeds', // цифры оставляем NauryzKeds
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),

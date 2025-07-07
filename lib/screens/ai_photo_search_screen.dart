@@ -83,7 +83,7 @@ class _AiPhotoSearchScreenState extends State<AiPhotoSearchScreen> {
           ),
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.18),
+              color: Colors.black.withOpacity(0.45), // затемнение на весь баннер
             ),
           ),
           // Кнопка назад
