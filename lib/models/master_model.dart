@@ -7,6 +7,15 @@ class MasterModel {
   final String instagram;
   final String tiktok;
   final List<String> gallery;
+  // Новые поля для ссылок и html
+  final String? pinterest;
+  final String? pinterestUrl;
+  final String? telegramUrl;
+  final String? tiktokUrl;
+  final String? bookingUrl;
+  final String? bio;
+  final String? locationHtml;
+  final String? galleryHtml;
 
   MasterModel({
     required this.name,
@@ -17,6 +26,14 @@ class MasterModel {
     required this.instagram,
     required this.tiktok,
     required this.gallery,
+    this.pinterest,
+    this.pinterestUrl,
+    this.telegramUrl,
+    this.tiktokUrl,
+    this.bookingUrl,
+    this.bio,
+    this.locationHtml,
+    this.galleryHtml,
   });
 
   static List<MasterModel> sampleData = [
@@ -29,6 +46,14 @@ class MasterModel {
       instagram: '@anya_ig',
       tiktok: '@anya_tt',
       gallery: ['assets/work1.png', 'assets/work2.png'],
+      pinterest: '@anya_pin',
+      pinterestUrl: 'https://pinterest.com/anya_pin',
+      telegramUrl: 'https://t.me/anya_tg',
+      tiktokUrl: 'https://tiktok.com/@anya_tt',
+      bookingUrl: 'https://t.me/emi3mo',
+      bio: '<b>Аня</b> — топовый мастер по тату в Москве. Работает с 2015 года.<br>Победитель чемпионата 2023.',
+      locationHtml: '<b>Москва, м. Арбатская</b><br>ул. Новый Арбат, 21',
+      galleryHtml: '',
     ),
     MasterModel(
       name: 'Игорь',

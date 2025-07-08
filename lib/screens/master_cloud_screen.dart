@@ -5,7 +5,7 @@ import '../models/master_model.dart';
 
 class MasterCloudScreen extends StatefulWidget {
   static const List<String> categories = [
-    'Tattoo', 'Nails', 'Hair', 'Jewelry', 'Custom', 'Location'
+    'Tattoo', 'Nails', 'Hair', 'Jewelry', 'Custom', 'second'
   ];
 
   final String city;

@@ -83,19 +83,21 @@ class _MasterJoinInfoScreenState extends State<MasterJoinInfoScreen> with Ticker
               color: Colors.black.withOpacity(0.25),
             ),
           ),
+          // Кнопка назад в стиле master_cloud_screen
+          Positioned(
+            top: 36,
+            left: 12,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28),
+              onPressed: () => Navigator.of(context).maybePop(),
+              splashRadius: 24,
+            ),
+          ),
           SafeArea(
             child: Column(
               children: [
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white.withOpacity(0.8)),
-                      onPressed: () => Navigator.of(context).pop(),
-                      splashRadius: 24,
-                      tooltip: 'Назад',
-                    ),
-                  ],
-                ),
+                // Теперь только текст, кнопка назад вынесена выше
+                const SizedBox(height: 12),
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(

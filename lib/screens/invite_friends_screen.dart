@@ -35,11 +35,11 @@ class _InviteFriendsScreenState extends State<InviteFriendsScreen> {
 
   Future<void> _shareWithFriends() async {
     setState(() => _isLoading = true);
-    final success = await TelegramWebAppService.inviteFriendsWithShare();
+      final success = await TelegramWebAppService.inviteFriendsWithShare();
     setState(() => _isLoading = false);
-    if (success) {
+      if (success) {
       // Всё ок, диалог открылся
-    } else {
+      } else {
       // Fallback: показать ссылку
     }
   }

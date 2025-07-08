@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>FSR Artist Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { background: #181818; color: #fff; font-family: 'Open Sans', Arial, sans-serif; margin: 0; padding: 0; }
+    .container { max-width: 900px; margin: 32px auto; background: #232323; border-radius: 12px; box-shadow: 0 2px 12px #0004; padding: 32px; }
+    h1 { color: #FF6EC7; font-size: 2.2em; margin-bottom: 24px; }
+    .artist-block { background: #222; border: 1px solid #444; border-radius: 8px; margin-bottom: 32px; padding: 24px; }
+    .artist-block h2 { color: #fff; margin: 0 0 12px 0; }
+    .row { display: flex; align-items: center; margin-bottom: 10px; }
+    .row label { min-width: 120px; color: #FF6EC7; font-weight: bold; }
+    .row input, .row textarea { flex: 1; background: #181818; color: #fff; border: 1px solid #444; border-radius: 4px; padding: 6px 10px; margin-left: 10px; }
+    .row textarea { min-height: 48px; }
+    .row .copy-btn { margin-left: 8px; background: #FF6EC7; color: #fff; border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer; }
+    .row .copy-btn:hover { background: #ff94d2; }
+    .card-link { color: #FF6EC7; text-decoration: underline; margin-left: 10px; }
+    .save-btn { background: #FF6EC7; color: #fff; border: none; border-radius: 4px; padding: 8px 18px; font-size: 1em; cursor: pointer; margin-top: 10px; }
+    .save-btn:hover { background: #ff94d2; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>FSR Artist Admin (внутренняя)</h1>
+    <div style="color:#FF6EC7; font-size:1em; margin-bottom:18px;">Автосохранение: все изменения сохраняются в браузере (localStorage) автоматически.</div>
+    <!-- Пример блока артиста -->
+    <div class="artist-block">
+      <h2>Аня <a class="card-link" href="#" target="_blank">Карточка</a></h2>
+      <div class="row">
+        <label>Booking URL:</label>
+        <input type="text" value="https://t.me/emi3mo" id="anya-booking">
+        <button class="copy-btn" onclick="copyField('anya-booking')">Копировать</button>
+      </div>
+      <div class="row">
+        <label>Bio (HTML):</label>
+        <textarea id="anya-bio">&lt;b&gt;Аня&lt;/b&gt; — топовый мастер по тату в Москве. Работает с 2015 года.&lt;br&gt;Победитель чемпионата 2023.</textarea>
+        <button class="copy-btn" onclick="copyField('anya-bio')">Копировать</button>
+      </div>
+      <div class="row">
+        <label>Location (HTML):</label>
+        <textarea id="anya-location">&lt;b&gt;Москва, м. Арбатская&lt;/b&gt;&lt;br&gt;ул. Новый Арбат, 21</textarea>
+        <button class="copy-btn" onclick="copyField('anya-location')">Копировать</button>
+      </div>
+      <div class="row">
+        <label>Gallery (HTML):</label>
+        <textarea id="anya-gallery"></textarea>
+        <button class="copy-btn" onclick="copyField('anya-gallery')">Копировать</button>
+      </div>
+      <button class="save-btn" onclick="alert('Все изменения уже автосохранены!')">Сохранить</button>
+    </div>
+    <!-- Добавляйте новые artist-block для других артистов -->
+    <div style="color:#888; font-size:0.95em;">Добавляйте новые блоки для каждого артиста вручную. Все изменения копируйте в код/модель Flutter.</div>
+  </div>
+  <script>
+    function copyField(id) {
+      const el = document.getElementById(id);
+      el.select();
+      el.setSelectionRange(0, 99999);
+      document.execCommand('copy');
+    }
+
+    // --- Автосохранение ---
+    function saveToLocalStorage(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        localStorage.setItem('artist_admin_' + id, el.value);
+      }
+    }
+    function loadFromLocalStorage(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        const val = localStorage.getItem('artist_admin_' + id);
+        if (val !== null) el.value = val;
+      }
+    }
+    // IDs всех полей для автосохранения
+    const fields = ['anya-booking', 'anya-bio', 'anya-location', 'anya-gallery'];
+    window.onload = function() {
+      fields.forEach(loadFromLocalStorage);
+      fields.forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', function() { saveToLocalStorage(id); });
+        }
+      });
+    };
+  </script>
+</body>
+</html> 
