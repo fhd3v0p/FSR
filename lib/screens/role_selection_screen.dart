@@ -15,18 +15,7 @@ class RoleSelectionScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const GiveawayScreen()),
-            );
-          },
-        ),
-      ),
+      // Убрали AppBar и верхнюю стрелку
       body: Stack(
         children: [
           Positioned.fill(
@@ -91,9 +80,9 @@ class RoleSelectionScreen extends StatelessWidget {
               ),
             ),
           ),
-          // Стрелка назад должна быть последней в списке children, чтобы быть поверх всего
+          // Верхняя стрелка назад (как на CitySelectionScreen)
           Positioned(
-            top: 55,
+            top: 36,
             left: 12,
             child: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28),

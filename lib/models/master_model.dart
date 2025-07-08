@@ -151,19 +151,27 @@ class MasterModel {
   ];
 
   static Future<MasterModel> fromArtistFolder(String folderPath) async {
-    // Чтение bio.txt только из папки артиста
-    final bio = await rootBundle.loadString('$folderPath/bio.txt');
-    // Чтение links.json
-    final linksJson = await rootBundle.loadString('$folderPath/links.json');
-    final links = jsonDecode(linksJson);
-    // Чтение галереи (gallery1.jpg, gallery2.jpg ...)
+    String bio = '';
+    Map<String, dynamic> links = {};
     final gallery = <String>[];
+    try {
+      bio = await rootBundle.loadString('$folderPath/bio.txt');
+    } catch (e) {
+      print('Ошибка чтения bio.txt для $folderPath: $e');
+    }
+    try {
+      final linksJson = await rootBundle.loadString('$folderPath/links.json');
+      links = jsonDecode(linksJson);
+    } catch (e) {
+      print('Ошибка чтения или парсинга links.json для $folderPath: $e');
+    }
     for (var i = 1; i <= 10; i++) {
       final path = '$folderPath/gallery$i.jpg';
       try {
         await rootBundle.load(path);
         gallery.add(path);
-      } catch (_) {
+      } catch (e) {
+        print('Галерея: не найден $path для $folderPath: $e');
         break;
       }
     }

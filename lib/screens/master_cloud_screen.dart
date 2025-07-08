@@ -5,7 +5,7 @@ import '../models/master_model.dart';
 
 class MasterCloudScreen extends StatefulWidget {
   static const List<String> categories = [
-    'Tattoo', 'Nails', 'Hair', 'Jewelry', 'Custom', 'second'
+    'Tattoo', 'Hair', 'Nails', 'Piercing', 'Jewelry', 'Custom', 'Second'
   ];
 
   final String city;
@@ -35,8 +35,16 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
   Future<void> _loadMasters() async {
     // Сканируем все папки в assets/artists/
     final artistFolders = [
-      'assets/artists/naidi',
-      'assets/artists/aspergill',
+      'assets/artists/spb_tattoo',
+      'assets/artists/spb_tattoo_1',
+      'assets/artists/spb_tattoo_2',
+      'assets/artists/spb_tattoo_3',
+      'assets/artists/spb_tattoo_4',
+      'assets/artists/spb_hair',
+      'assets/artists/spb_piercing',
+      'assets/artists/moscow_tattoo',
+      'assets/artists/msk_tattoo_3',
+      // 'assets/artists/naidi2',
       // Добавьте новые папки здесь по мере необходимости
     ];
     final loaded = <MasterModel>[];
@@ -46,6 +54,7 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
         loaded.add(m);
       } catch (_) {}
     }
+    if (!mounted) return;
     setState(() {
       masters = loaded;
       _loading = false;
@@ -113,7 +122,7 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
           ),
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.18),
+              color: Colors.black.withOpacity(0.3),
             ),
           ),
           // Кнопка назад

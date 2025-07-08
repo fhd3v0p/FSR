@@ -53,6 +53,8 @@ flutter:
     - assets/artists/naidi/gallery1.jpg
     - assets/artists/naidi/gallery2.jpg
     - assets/artists/naidi/gallery3.jpg
+    - assets/artists/naidi/gallery4.jpg
+    - assets/artists/naidi/gallery5.jpg
     - assets/artists/aspergill/avatar.png
     - assets/artists/aspergill/gallery1.jpg
     - assets/artists/aspergill/gallery2.jpg
@@ -64,6 +66,16 @@ flutter:
     - assets/artists/aspergill/gallery8.jpg
     - assets/artists/aspergill/gallery9.jpg
     - assets/artists/aspergill/gallery10.jpg
+    - assets/artists/moscow_tattoo/
+    - assets/artists/naidi2/
+    - assets/artists/spb_tattoo/
+    - assets/artists/spb_tattoo_1/
+    - assets/artists/spb_tattoo_2/
+    - assets/artists/spb_tattoo_3/
+    - assets/artists/spb_tattoo_4/
+    - assets/artists/spb_hair/
+    - assets/artists/spb_piercing/
+    - assets/artists/msk_tattoo_3/
 
   fonts:
     - family: OpenSans

@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:html' as html;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/foundation.dart'; // добавлено для kDebugMode
 import '../services/telegram_webapp_service.dart';
 
 
