@@ -22,10 +22,34 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
   Timer? _autoScrollTimer;
   bool _isPaused = false;
 
+  List<MasterModel> masters = [];
+  bool _loading = true;
+
   @override
   void initState() {
     super.initState();
     _startAutoScroll();
+    _loadMasters();
+  }
+
+  Future<void> _loadMasters() async {
+    // Сканируем все папки в assets/artists/
+    final artistFolders = [
+      'assets/artists/naidi',
+      'assets/artists/aspergill',
+      // Добавьте новые папки здесь по мере необходимости
+    ];
+    final loaded = <MasterModel>[];
+    for (final folder in artistFolders) {
+      try {
+        final m = await MasterModel.fromArtistFolder(folder);
+        loaded.add(m);
+      } catch (_) {}
+    }
+    setState(() {
+      masters = loaded;
+      _loading = false;
+    });
   }
 
   @override
@@ -64,17 +88,18 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final masters = List.generate(
-      9,
-      (i) => MasterModel.sampleData[i % MasterModel.sampleData.length].copyWith(
-        name: '${MasterModel.sampleData[i % MasterModel.sampleData.length].name} ${i + 1}',
-        city: widget.city,
-        category: selectedCategory,
-      ),
-    );
-
+    if (_loading) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    final filtered = masters.where((m) =>
+      (m.category.toLowerCase() == selectedCategory.toLowerCase() || selectedCategory == '') &&
+      (m.city.toLowerCase() == widget.city.toLowerCase() || widget.city == '' || m.city == '')
+    ).toList();
     final screenWidth = MediaQuery.of(context).size.width;
-    final avatarSize = (screenWidth - 24 * 2 - 40) / 3;
+    final avatarSize = (screenWidth - 24 * 2 - 40) / 3 * 0.7; // уменьшили на 30%
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -155,7 +180,7 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     child: GridView.builder(
                       clipBehavior: Clip.none,
-                      itemCount: masters.length,
+                      itemCount: filtered.length,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 3,
                         mainAxisSpacing: 16,
@@ -163,7 +188,7 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
                         childAspectRatio: 0.75,
                       ),
                       itemBuilder: (context, i) {
-                        final m = masters[i];
+                        final m = filtered[i];
                         return GestureDetector(
                           onTap: () => Navigator.push(
                             context,
@@ -179,11 +204,12 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(color: Colors.white, width: 2),
+                                  color: Colors.black.withOpacity(0.8), // фон для PNG
                                 ),
                                 child: CircleAvatar(
                                   backgroundImage: AssetImage(m.avatar),
                                   radius: avatarSize / 2.3,
-                                  backgroundColor: Colors.black.withOpacity(0.5), // Полупрозрачный фон
+                                  backgroundColor: Colors.transparent,
                                 ),
                               ),
                               const SizedBox(height: 8),

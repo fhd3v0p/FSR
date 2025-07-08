@@ -1,3 +1,6 @@
+import 'package:flutter/services.dart' show rootBundle;
+import 'dart:convert';
+
 class MasterModel {
   final String name;
   final String city;
@@ -146,4 +149,41 @@ class MasterModel {
       gallery: ['assets/work1.png', 'assets/work2.png'],
     ),
   ];
+
+  static Future<MasterModel> fromArtistFolder(String folderPath) async {
+    // Чтение bio.txt только из папки артиста
+    final bio = await rootBundle.loadString('$folderPath/bio.txt');
+    // Чтение links.json
+    final linksJson = await rootBundle.loadString('$folderPath/links.json');
+    final links = jsonDecode(linksJson);
+    // Чтение галереи (gallery1.jpg, gallery2.jpg ...)
+    final gallery = <String>[];
+    for (var i = 1; i <= 10; i++) {
+      final path = '$folderPath/gallery$i.jpg';
+      try {
+        await rootBundle.load(path);
+        gallery.add(path);
+      } catch (_) {
+        break;
+      }
+    }
+    return MasterModel(
+      name: links['name'] ?? 'Artist',
+      city: links['city'] ?? '',
+      category: links['category'] ?? '',
+      avatar: '$folderPath/avatar.png',
+      telegram: links['telegram'] ?? '',
+      instagram: links['instagram'] ?? '',
+      tiktok: links['tiktok'] ?? '',
+      gallery: gallery,
+      pinterest: links['pinterest'],
+      pinterestUrl: links['pinterestUrl'],
+      telegramUrl: links['telegramUrl'],
+      tiktokUrl: links['tiktokUrl'],
+      bookingUrl: links['bookingUrl'],
+      bio: bio, // bio только из файла
+      locationHtml: links['locationHtml'],
+      galleryHtml: links['galleryHtml'],
+    );
+  }
 }

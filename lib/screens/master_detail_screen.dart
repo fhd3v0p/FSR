@@ -215,8 +215,8 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
+                      children: [
+                        const Text(
                           'BIO',
                           style: TextStyle(
                             color: Color(0xFFFF6EC7),
@@ -225,10 +225,10 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         Text(
-                          'Занимаюсь стрижками и окрашиваниями в альтернативном стиле, вдохновлёнными субкультурами, аниме, мультиками и всем остальным, т.к. работаю по мудбордам',
-                          style: TextStyle(
+                          master.bio ?? '',
+                          style: const TextStyle(
                             color: Colors.white,
                             fontFamily: 'OpenSans',
                             fontSize: 15,
@@ -267,9 +267,7 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                master.city is List
-                                    ? (master.city as List).join(', ')
-                                    : master.city,
+                                master.locationHtml ?? '',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
