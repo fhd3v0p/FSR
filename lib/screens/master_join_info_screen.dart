@@ -13,15 +13,15 @@ class _MasterJoinInfoScreenState extends State<MasterJoinInfoScreen> with Ticker
   final List<_AdvantageItem> advantages = [
     _AdvantageItem(
       icon: Icons.schedule,
-      text: '1. Занятость nonstop, no cap!\nКлиенты сами фрагят тебя через TG/WebApp — пустых слотов нет, всё стримится.',
+      text: '1. Постоянная занятость\nКлиенты находят вас через нашу платформу — ваш график всегда заполнен, поток клиентов не прекращается.',
     ),
     _AdvantageItem(
       icon: Icons.trending_up,
-      text: '2. Твой Drip = наш контент!\nТвои тату, маник, окрасы и кастомы — постоянно в мемах, сториз, дропах, розыгрышах.',
+      text: '2. Ваше творчество — наш контент\nВаши работы становятся частью нашего контента: публикации, истории, специальные проекты и розыгрыши.',
     ),
     _AdvantageItem(
       icon: Icons.star,
-      text: '3. Профессиональный glow-up!\nС Fresh Style Russia ты в elite squad: челленджи, ап цен, рост цифр и меньше заеб.',
+      text: '3. Профессиональный рост\nС Fresh Style Russia вы входите в сообщество лучших в своем деле: участие в челленджах, повышение цен, рост клиентской базы и меньше рутины.',
     ),
   ];
 
@@ -96,8 +96,8 @@ class _MasterJoinInfoScreenState extends State<MasterJoinInfoScreen> with Ticker
           SafeArea(
             child: Column(
               children: [
-                // Теперь только текст, кнопка назад вынесена выше
                 const SizedBox(height: 12),
+                // Фраза FOR ARTISTS теперь под кнопкой назад
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
@@ -105,7 +105,7 @@ class _MasterJoinInfoScreenState extends State<MasterJoinInfoScreen> with Ticker
                     style: const TextStyle(
                       fontFamily: 'NauryzKeds',
                       color: Colors.white,
-                      fontSize: 64, // чуть меньше, чтобы точно помещался
+                      fontSize: 64,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 2,
                     ),

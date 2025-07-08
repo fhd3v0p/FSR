@@ -29,7 +29,7 @@ echo "✅ Flutter готов"
 
 # === СБИРАЕМ FLUTTER WEB ===
 echo "🔨 Собираем Flutter Web приложение..."
-cd "$LOCAL_PROJECT_PATH"
+cd /Users/h0/flutter/FSR
 
 # Очищаем предыдущую сборку
 rm -rf build/web

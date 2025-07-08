@@ -31,7 +31,7 @@ telegram_logger = TelegramLogger()
 admin_ids = [int(os.getenv('ADMIN_CHAT_ID', '0'))]
 
 # Константы
-WEBAPP_URL = os.getenv('WEBAPP_URL', 'https://fsr.agency')
+WEBAPP_URL = 'https://FSR.agency'
 GIVEAWAY_LINK = os.getenv('GIVEAWAY_LINK', 'https://t.me/addlist/f3YaeLmoNsdkYjVl')
 
 # Функция для получения URL с версией для принудительного обновления кэша
@@ -62,7 +62,7 @@ def get_webapp_keyboard() -> InlineKeyboardMarkup:
     builder.add(
         InlineKeyboardButton(
             text="🌟 Open FSR",
-            web_app=types.WebAppInfo(url=get_webapp_url_with_version())
+            web_app=types.WebAppInfo(url=WEBAPP_URL)
         )
     )
     return builder.as_markup()
@@ -80,7 +80,7 @@ def get_giveaway_keyboard() -> InlineKeyboardMarkup:
     builder.add(
         InlineKeyboardButton(
             text="🌟 Open FSR",
-            web_app=types.WebAppInfo(url=get_webapp_url_with_version())
+            web_app=types.WebAppInfo(url=WEBAPP_URL)
         )
     )
     return builder.as_markup()
@@ -137,7 +137,7 @@ async def cmd_start(message: types.Message):
     builder = InlineKeyboardBuilder()
     builder.add(InlineKeyboardButton(
         text="🌟 Open FSR",
-        web_app=WebAppInfo(url=get_webapp_url_with_version())
+        web_app=WebAppInfo(url=WEBAPP_URL)
     ))
     builder.add(InlineKeyboardButton(
         text="📁 Подписаться на папку",
@@ -164,9 +164,13 @@ async def cmd_start(message: types.Message):
 async def cmd_giveaway(message: types.Message):
     """Обработчик команды /giveaway"""
     user_id = message.from_user.id
+    username = message.from_user.username
+    first_name = message.from_user.first_name
     
     # Логируем действие
-    telegram_logger.log_user_action(user_id, "giveaway", "User requested giveaway info")
+    asyncio.create_task(telegram_logger.log_user_action(
+        user_id, username, first_name, "giveaway", "User requested giveaway info"
+    ))
     
     # Получаем информацию о подарках
     prizes = db.get_giveaway_prizes()
@@ -194,18 +198,22 @@ async def cmd_giveaway(message: types.Message):
     ))
     builder.add(InlineKeyboardButton(
         text="🌟 Открыть приложение",
-        web_app=WebAppInfo(url=get_webapp_url_with_version())
+        web_app=WebAppInfo(url=WEBAPP_URL)
     ))
-    
+    # Удаляем кнопку Open FSR
     await message.answer(prizes_text, reply_markup=builder.as_markup(), parse_mode=ParseMode.MARKDOWN)
 
 @dp.message(Command("invite"))
 async def cmd_invite(message: types.Message):
     """Обработчик команды /invite для приглашения друзей"""
     user_id = message.from_user.id
+    username = message.from_user.username
+    first_name = message.from_user.first_name
     
     # Логируем действие
-    telegram_logger.log_user_action(user_id, "invite", "User requested invite friends")
+    asyncio.create_task(telegram_logger.log_user_action(
+        user_id, username, first_name, "invite", "User requested invite friends"
+    ))
     
     # Получаем реферальную информацию пользователя
     ref_info = db.get_user_referral_info(user_id)
@@ -263,13 +271,17 @@ async def cmd_invite(message: types.Message):
 async def cmd_stats(message: types.Message):
     """Обработчик команды /stats (только для админов)"""
     user_id = message.from_user.id
+    username = message.from_user.username
+    first_name = message.from_user.first_name
     
     if user_id not in admin_ids:
         await message.answer("❌ У вас нет доступа к этой команде")
         return
     
     # Логируем действие
-    telegram_logger.log_user_action(user_id, "admin_stats", "Admin requested stats")
+    asyncio.create_task(telegram_logger.log_user_action(
+        user_id, username, first_name, "admin_stats", "Admin requested stats"
+    ))
     
     # Получаем глобальную статистику
     global_stats = db.get_global_stats()
@@ -298,40 +310,49 @@ async def cmd_stats(message: types.Message):
 async def cmd_help(message: types.Message):
     """Обработчик команды /help"""
     user_id = message.from_user.id
+    username = message.from_user.username
+    first_name = message.from_user.first_name
     
     # Логируем действие
-    telegram_logger.log_user_action(user_id, "help", "User requested help")
+    asyncio.create_task(telegram_logger.log_user_action(
+        user_id, username, first_name, "help", "User requested help"
+    ))
     
     help_text = """
-🤖 **FSR Bot - Справка**
+<b>🤖 FSR Bot - Справка</b>
 
-📋 **Доступные команды:**
-• `/start` - Запустить бота и открыть приложение
-• `/giveaway` - Информация о розыгрыше призов
-• `/invite` - Пригласить друзей и получить бонусы
-• `/help` - Показать эту справку
+<b>📋 Доступные команды:</b>
+• <code>/start</code> - Запустить бота и открыть приложение
+• <code>/giveaway</code> - Информация о розыгрыше призов
+• <code>/invite</code> - Пригласить друзей и получить бонусы
+• <code>/help</code> - Показать эту справку
 
-🎯 **Как использовать:**
-1. Нажми "Open FSR" чтобы открыть приложение
+<b>🎯 Как использовать:</b>
+1. Нажми <b>Open FSR</b> чтобы открыть приложение
 2. Выбери роль (клиент/артист)
 3. Используй AI-поиск или каталог
 4. Участвуй в гивевее и приглашай друзей
 
-🎁 **Призы гивевея:**
-• Сертификат в ZARA - 20,000₽
+<b>🎁 Призы гивевея:</b>
+• Сертификат Золотое Яблоко - 20,000₽
 • Бьюти-услуги - 100,000₽
-• VIP-статус - 50,000₽
+• Telegram Premium (3 мес) - 3,500₽
+• <b>🏆 Общая стоимость призов: 123,500₽</b>
 
-💬 **Поддержка:** @FSR_Adminka
+<b>🎫 Как получить билеты:</b>
+• 1 билет — за подписку на Telegram-папку
+• +1 билет — за каждого друга по реферальной ссылке
+
+<b>💬 Поддержка:</b> @FSR_Adminka
     """
     
     builder = InlineKeyboardBuilder()
     builder.add(InlineKeyboardButton(
         text="🌟 Open FSR",
-        web_app=WebAppInfo(url=get_webapp_url_with_version())
+        web_app=WebAppInfo(url=WEBAPP_URL)
     ))
     
-    await message.answer(help_text, reply_markup=builder.as_markup(), parse_mode=ParseMode.MARKDOWN)
+    await message.answer(help_text, reply_markup=builder.as_markup(), parse_mode=ParseMode.HTML)
 
 @dp.callback_query(lambda c: c.data == "my_stats")
 async def callback_my_stats(callback: types.CallbackQuery):
@@ -499,7 +520,9 @@ async def handle_all_messages(message: types.Message):
     first_name = message.from_user.first_name
     
     # Логируем действие пользователя
-    telegram_logger.log_user_action(user_id, "message_sent", f"User sent message: {message.text[:50]}{'...' if len(message.text) > 50 else ''}")
+    asyncio.create_task(telegram_logger.log_user_action(
+        user_id, username, first_name, "message_sent", f"User sent message: {message.text[:50]}{'...' if len(message.text) > 50 else ''}"
+    ))
     
     await db.update_user_activity(user_id, "message_sent")
     
@@ -517,7 +540,8 @@ async def handle_all_messages(message: types.Message):
 async def check_bot_admin_status():
     channel_id = -1001973736826
     try:
-        member = await bot.get_chat_member(chat_id=channel_id, user_id=(await bot.me).id)
+        me = await bot.get_me()
+        member = await bot.get_chat_member(chat_id=channel_id, user_id=me.id)
         if member.status in ['administrator', 'creator']:
             logger.info(f"✅ Бот является админом в канале {channel_id}")
         else:
