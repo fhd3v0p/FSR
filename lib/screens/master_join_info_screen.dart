@@ -83,21 +83,22 @@ class _MasterJoinInfoScreenState extends State<MasterJoinInfoScreen> with Ticker
               color: Colors.black.withOpacity(0.25),
             ),
           ),
-          // Кнопка назад в стиле master_cloud_screen
-          Positioned(
-            top: 36,
-            left: 12,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28),
-              onPressed: () => Navigator.of(context).maybePop(),
-              splashRadius: 24,
-            ),
-          ),
           SafeArea(
             child: Column(
               children: [
                 const SizedBox(height: 12),
-                // Фраза FOR ARTISTS теперь под кнопкой назад
+                // Кнопка назад теперь над фразой FOR ARTISTS
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28),
+                      onPressed: () => Navigator.of(context).maybePop(),
+                      splashRadius: 24,
+                    ),
+                  ),
+                ),
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
@@ -158,35 +159,41 @@ class _MasterJoinInfoScreenState extends State<MasterJoinInfoScreen> with Ticker
                     ),
                   ),
                 ),
+                // Кнопка присоединиться с теми же отступами, что и баннеры
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                  child: GestureDetector(
-                    onTap: () async {
-                      const url = 'https://t.me/FSR_Adminka';
-                      if (await canLaunchUrl(Uri.parse(url))) {
-                        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-                      }
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.zero,
-                        color: Colors.white,
-                        border: Border.all(
-                          color: const Color(0xFFFF6EC7),
-                          width: 1.5,
-                        ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 24, top: 0),
+                    width: double.infinity,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.zero,
+                      color: Colors.white,
+                      border: Border.all(
+                        color: const Color(0xFFFF6EC7),
+                        width: 1.5,
                       ),
-                      child: const Center(
-                        child: Text(
-                          'ПРИСОЕДИНИТЬСЯ',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20,
-                            fontFamily: 'NauryzKeds',
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.zero,
+                        onTap: () async {
+                          const url = 'https://t.me/FSR_Adminka';
+                          if (await canLaunchUrl(Uri.parse(url))) {
+                            await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+                          }
+                        },
+                        child: const Center(
+                          child: Text(
+                            'ПРИСОЕДИНИТЬСЯ',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
+                              fontFamily: 'NauryzKeds',
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                            ),
                           ),
                         ),
                       ),

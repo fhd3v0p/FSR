@@ -44,12 +44,13 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
       'assets/artists/Lin++',
       'assets/artists/Blodivamp',
       'assets/artists/Aspergill',
+      'assets/artists/AspergillHair', // Новый артист категории Hair
       'assets/artists/EMI',
       'assets/artists/Naidi',
       'assets/artists/MurderDoll',
       'assets/artists/Клубника',
       'assets/artists/Чучундра',
-      'assets/artists/SonyaHair', // Новый артист категории Hair
+      'assets/artists/SonyaHair',
       'assets/artists/moscow_tattoo',
       'assets/artists/msk_tattoo_3',
       // 'assets/artists/naidi2',
@@ -221,7 +222,7 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(color: Colors.white, width: 2),
-                                  color: Colors.black.withOpacity(0.8), // фон для PNG
+                                  color: Color(0xFFF3E0E6), // фон для PNG
                                 ),
                                 child: CircleAvatar(
                                   backgroundImage: AssetImage(m.avatar),

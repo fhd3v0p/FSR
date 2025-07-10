@@ -153,7 +153,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                           Container(
                             padding: const EdgeInsets.all(3),
                             decoration: const BoxDecoration(
-                              color: Colors.white,
+                              color: Color(0xFFF3E0E6),
                               shape: BoxShape.circle,
                             ),
                             child: const CircleAvatar(
@@ -244,7 +244,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: Color(0xFFF3E0E6),
         shape: BoxShape.circle,
       ),
       child: CircleAvatar(
