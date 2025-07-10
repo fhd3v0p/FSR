@@ -5,7 +5,13 @@ import '../models/master_model.dart';
 
 class MasterCloudScreen extends StatefulWidget {
   static const List<String> categories = [
-    'Tattoo', 'Hair', 'Nails', 'Piercing', 'Jewelry', 'Custom', 'Second'
+    'Tattoo',
+    'Hair',
+    // 'Nails',
+    'Piercing',
+    // 'Jewelry',
+    // 'Custom',
+    // 'Second',
   ];
 
   final String city;
@@ -35,13 +41,15 @@ class _MasterCloudScreenState extends State<MasterCloudScreen> {
   Future<void> _loadMasters() async {
     // Сканируем все папки в assets/artists/
     final artistFolders = [
-      'assets/artists/spb_tattoo',
-      'assets/artists/spb_tattoo_1',
-      'assets/artists/spb_tattoo_2',
-      'assets/artists/spb_tattoo_3',
-      'assets/artists/spb_tattoo_4',
-      'assets/artists/spb_hair',
-      'assets/artists/spb_piercing',
+      'assets/artists/Lin++',
+      'assets/artists/Blodivamp',
+      'assets/artists/Aspergill',
+      'assets/artists/EMI',
+      'assets/artists/Naidi',
+      'assets/artists/MurderDoll',
+      'assets/artists/Клубника',
+      'assets/artists/Чучундра',
+      'assets/artists/SonyaHair', // Новый артист категории Hair
       'assets/artists/moscow_tattoo',
       'assets/artists/msk_tattoo_3',
       // 'assets/artists/naidi2',
