@@ -194,4 +194,15 @@ class MasterModel {
       galleryHtml: links['galleryHtml'],
     );
   }
+
+  static Future<List<MasterModel>> loadAllFromFolders(List<String> artistFolders) async {
+    final loaded = <MasterModel>[];
+    for (final folder in artistFolders) {
+      try {
+        final m = await MasterModel.fromArtistFolder(folder);
+        loaded.add(m);
+      } catch (_) {}
+    }
+    return loaded;
+  }
 }

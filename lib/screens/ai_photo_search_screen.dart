@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'master_cloud_screen.dart';
+import 'master_cloud_screen.dart' as mcs;
 import '../services/telegram_webapp_service.dart';
 import '../models/photo_upload_model.dart';
+import 'dart:math';
+import '../models/master_model.dart';
+import 'master_detail_screen.dart';
+import 'choose_search_mode_screen.dart';
+import 'welcome_screen.dart';
 
 class AiPhotoSearchScreen extends StatefulWidget {
   const AiPhotoSearchScreen({super.key});
@@ -20,7 +25,7 @@ class _AiPhotoSearchScreenState extends State<AiPhotoSearchScreen> {
   void initState() {
     super.initState();
     // Получаем категории из master_cloud_screen.dart
-    categories = MasterCloudScreen.categories;
+    categories = mcs.MasterCloudScreen.categories;
     selectedCategory = categories.isNotEmpty ? categories.first : null;
   }
 
@@ -46,11 +51,36 @@ class _AiPhotoSearchScreenState extends State<AiPhotoSearchScreen> {
         setState(() {
           _lastUploadedPhoto = photoUpload;
         });
-        
-        _showSuccess('Фото успешно загружено! Мы найдем для вас подходящего артиста.');
-        
-        // Здесь можно добавить логику для перехода к результатам поиска
-        // или показать превью загруженного фото
+        // Список папок артистов как в master_cloud_screen.dart
+        final artistFolders = [
+          'assets/artists/Lin++',
+          'assets/artists/Blodivamp',
+          'assets/artists/Aspergill',
+          'assets/artists/EMI',
+          'assets/artists/Naidi',
+          'assets/artists/MurderDoll',
+          'assets/artists/Клубника',
+          'assets/artists/Чучундра',
+          'assets/artists/msk_tattoo_EMI',
+          'assets/artists/msk_tattoo_Alena',
+        ];
+        // Показать экран загрузки с анимацией (welcome-style)
+        await Navigator.of(context).push(PageRouteBuilder(
+          opaque: false,
+          pageBuilder: (_, __, ___) => const _AiPhotoLoadingScreen(),
+        ));
+        final allMasters = await MasterModel.loadAllFromFolders(artistFolders);
+        final filtered = allMasters.where((m) => m.category == selectedCategory).toList();
+        if (filtered.isNotEmpty) {
+          final randomArtist = filtered[Random().nextInt(filtered.length)];
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => _AiPhotoResultScreen(master: randomArtist),
+            ),
+          );
+        } else {
+          _showError('Не найдено артистов в выбранной категории');
+        }
       }
     } catch (e) {
       _showError(e.toString());
@@ -234,6 +264,288 @@ class _AiPhotoSearchScreenState extends State<AiPhotoSearchScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _AiPhotoResultScreen extends StatelessWidget {
+  final MasterModel master;
+  const _AiPhotoResultScreen({required this.master});
+  @override
+  Widget build(BuildContext context) {
+    final avatarSize = 90.0;
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/giveaway_banner.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.45),
+            ),
+          ),
+          Positioned(
+            top: 36,
+            left: 12,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 28),
+              onPressed: () => Navigator.of(context).maybePop(),
+              splashRadius: 24,
+            ),
+          ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                    color: Color(0xFFF3E0E6),
+                  ),
+                  child: CircleAvatar(
+                    backgroundImage: AssetImage(master.avatar),
+                    radius: avatarSize / 2.3,
+                    backgroundColor: Colors.transparent,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  master.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'NauryzKeds',
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                _DetailModeButton(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => MasterDetailScreen(master: master),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AiPhotoLoadingScreen extends StatefulWidget {
+  const _AiPhotoLoadingScreen();
+  @override
+  State<_AiPhotoLoadingScreen> createState() => _AiPhotoLoadingScreenState();
+}
+class _AiPhotoLoadingScreenState extends State<_AiPhotoLoadingScreen> with TickerProviderStateMixin {
+  late final AnimationController _pulseController;
+  late final Animation<double> _pulseAnimation;
+  double _orbitAngle = 0.0;
+  final List<String> avatars = [
+    'assets/avatar1.png',
+    'assets/avatar2.png',
+    'assets/avatar3.png',
+    'assets/avatar4.png',
+    'assets/avatar5.png',
+    'assets/avatar6.png',
+  ];
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+    _startOrbitAnimation();
+    // Имитация загрузки 2.5 сек
+    Future.delayed(const Duration(milliseconds: 2500), () {
+      if (mounted) Navigator.of(context).pop();
+    });
+  }
+  void _startOrbitAnimation() {
+    const double baseSpeed = 0.012;
+    const Duration frameDuration = Duration(milliseconds: 16);
+    void tick() {
+      if (!mounted) return;
+      _orbitAngle += baseSpeed;
+      if (_orbitAngle > 2 * pi) {
+        _orbitAngle -= 2 * pi;
+      }
+      setState(() {});
+      Future.delayed(frameDuration, tick);
+    }
+    tick();
+  }
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+  Offset calculateOrbitPosition(double angle, double radius) {
+    return Offset(radius * cos(angle), radius * sin(angle));
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black.withOpacity(0.7),
+      body: Center(
+        child: SizedBox(
+          width: 320,
+          height: 320,
+          child: AnimatedBuilder(
+            animation: _pulseController,
+            builder: (context, _) {
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  CustomPaint(
+                    size: const Size(320, 320),
+                    painter: DottedCirclePainter(),
+                  ),
+                  Transform.scale(
+                    scale: _pulseAnimation.value,
+                    child: Container(
+                      width: 224,
+                      height: 224,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFFFF6EC7).withOpacity(0.4),
+                      ),
+                    ),
+                  ),
+                  Transform.scale(
+                    scale: _pulseAnimation.value,
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFFFF6EC7).withOpacity(0.85),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 320,
+                    height: 320,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFFFFB3E6).withOpacity(0.2),
+                    ),
+                  ),
+                  for (int i = 0; i < 3; i++)
+                    Transform.translate(
+                      offset: calculateOrbitPosition(
+                          _orbitAngle + (i * 2 * pi / 3), 160),
+                      child: _framedMemoji(avatars[i]),
+                    ),
+                  for (int i = 0; i < 2; i++)
+                    Transform.translate(
+                      offset: calculateOrbitPosition(
+                          -_orbitAngle + (i * pi), 112),
+                      child: _framedMemoji(avatars[3 + i]),
+                    ),
+                  Transform.translate(
+                    offset: calculateOrbitPosition(_orbitAngle, 86),
+                    child: _framedMemoji(avatars[5]),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF3E0E6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const CircleAvatar(
+                      radius: 36,
+                      backgroundImage: AssetImage('assets/center_memoji.png'),
+                      backgroundColor: Color(0xFF33272D),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+  Widget _framedMemoji(String path) {
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: const BoxDecoration(
+        color: Color(0xFFF3E0E6),
+        shape: BoxShape.circle,
+      ),
+      child: CircleAvatar(
+        radius: 20,
+        backgroundImage: AssetImage(path),
+        backgroundColor: Colors.black,
+      ),
+    );
+  }
+}
+
+class _DetailModeButton extends StatelessWidget {
+  final VoidCallback onTap;
+  final bool selected;
+  const _DetailModeButton({required this.onTap, this.selected = false});
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 18),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.zero,
+          color: Colors.black.withOpacity(selected ? 0.45 : 0.45),
+          border: Border.all(
+            color: selected ? const Color(0xFFFF6EC7) : Colors.white,
+            width: selected ? 3 : 1.5,
+          ),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFFFF6EC7).withOpacity(0.25),
+                    blurRadius: 16,
+                  ),
+                ]
+              : [],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.arrow_forward, color: Colors.white, size: 32),
+            SizedBox(width: 18),
+            Text(
+              'Подробнее',
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'OpenSans',
+                fontWeight: FontWeight.bold,
+                fontSize: 22,
+                letterSpacing: 1.1,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

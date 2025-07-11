@@ -62,17 +62,56 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #8E5BBE 0%, #FF6EC7 100%);
+    width: 100vw;
+    height: 100vh;
+    background: #000;
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 9999;
+    flex-direction: column;
   ">
-    <div style="text-align: center; color: white;">
-      <h1 style="font-family: 'NauryzKeds', sans-serif; margin-bottom: 20px;">Fresh Style Russia</h1>
-      <div style="width: 40px; height: 40px; border: 3px solid white; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+    <div style="display: flex; flex-direction: column; align-items: flex-start;">
+      <span id="fresh-word" style="
+        opacity: 0;
+        font-family: 'NauryzKeds', sans-serif;
+        font-size: 48px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        margin-bottom: 8px;
+        transition: opacity 0.5s;
+        text-align: left;
+      ">
+        <span style="color: #fff;">F</span><span style="color: #bbb;">RESH</span>
+      </span>
+      <span id="style-word" style="
+        opacity: 0;
+        font-family: 'NauryzKeds', sans-serif;
+        font-size: 48px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        margin-bottom: 8px;
+        position: relative;
+        right: -120px;
+        transition: right 0.5s, opacity 0.3s;
+        text-align: left;
+      ">
+        <span style="color: #fff;">S</span><span style="color: #bbb;">TYLE</span>
+      </span>
+      <span id="russia-word" style="
+        opacity: 0;
+        font-family: 'NauryzKeds', sans-serif;
+        font-size: 48px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        margin-bottom: 8px;
+        display: inline-block;
+        transform: scale(0.7) translateY(-60px) rotate(-8deg);
+        transition: transform 0.18s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.18s;
+        text-align: left;
+      ">
+        <span style="color: #fff;">R</span><span style="color: #bbb;">USSIA</span>
+      </span>
     </div>
   </div>
   
@@ -108,6 +147,37 @@
         document.getElementById('loading').style.display = 'none';
       }, 2000);
     });
+
+    function animateWords() {
+      const fresh = document.getElementById('fresh-word');
+      const style = document.getElementById('style-word');
+      const russia = document.getElementById('russia-word');
+      fresh.style.opacity = 0;
+      style.style.opacity = 0;
+      style.style.right = '-120px';
+      russia.style.opacity = 0;
+      russia.style.transform = 'scale(0.7) translateY(-60px) rotate(-8deg)';
+      setTimeout(() => {
+        fresh.style.opacity = 1;
+      }, 500);
+      setTimeout(() => {
+        style.style.opacity = 1;
+        style.style.right = '0px';
+      }, 1100);
+      setTimeout(() => {
+        russia.style.opacity = 1;
+        russia.style.transform = 'scale(1) translateY(0) rotate(0deg)';
+      }, 1600);
+      setTimeout(() => {
+        fresh.style.opacity = 0;
+        style.style.opacity = 0;
+        style.style.right = '-120px';
+        russia.style.opacity = 0;
+        russia.style.transform = 'scale(0.7) translateY(-60px) rotate(-8deg)';
+      }, 2600);
+    }
+    let loaderInterval = setInterval(animateWords, 2700);
+    animateWords();
   </script>
   
   <script src="flutter_bootstrap.js" async></script>

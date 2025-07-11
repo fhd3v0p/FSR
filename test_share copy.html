@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>FSR Loader Demo</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    flex-direction: column;
+  ">
+    <span id="fresh-word" style="
+      opacity: 0;
+      color: #fff;
+      font-family: 'NauryzKeds', sans-serif;
+      font-size: 48px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      transition: opacity 0.5s;
+    ">FRESH</span>
+    <span id="style-word" style="
+      opacity: 0;
+      color: #fff;
+      font-family: 'NauryzKeds', sans-serif;
+      font-size: 48px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      position: relative;
+      right: -120px;
+      transition: right 0.5s, opacity 0.3s;
+    ">STYLE</span>
+    <span id="russia-word" style="
+      opacity: 0;
+      color: #fff;
+      font-family: 'NauryzKeds', sans-serif;
+      font-size: 48px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+      display: inline-block;
+      transform: scale(0.7) translateY(-60px) rotate(-8deg);
+      transition: transform 0.18s cubic-bezier(.68,-0.55,.27,1.55), opacity 0.18s;
+    ">RUSSIA</span>
+  </div>
+  <script>
+    function animateWords() {
+      const fresh = document.getElementById('fresh-word');
+      const style = document.getElementById('style-word');
+      const russia = document.getElementById('russia-word');
+      fresh.style.opacity = 0;
+      style.style.opacity = 0;
+      style.style.right = '-120px';
+      russia.style.opacity = 0;
+      russia.style.transform = 'scale(0.7) translateY(-60px) rotate(-8deg)';
+      setTimeout(() => {
+        fresh.style.opacity = 1;
+      }, 500);
+      setTimeout(() => {
+        style.style.opacity = 1;
+        style.style.right = '0px';
+      }, 1100);
+      setTimeout(() => {
+        russia.style.opacity = 1;
+        russia.style.transform = 'scale(1) translateY(0) rotate(0deg)';
+      }, 1300);
+      setTimeout(() => {
+        fresh.style.opacity = 0;
+        style.style.opacity = 0;
+        style.style.right = '-120px';
+        russia.style.opacity = 0;
+        russia.style.transform = 'scale(0.7) translateY(-60px) rotate(-8deg)';
+      }, 2600);
+    }
+    let loaderInterval = setInterval(animateWords, 2700);
+    animateWords();
+  </script>
+</body>
+</html>

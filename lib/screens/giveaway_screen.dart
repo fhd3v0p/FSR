@@ -26,7 +26,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
   String? _username;
   int _tickets = 0;
 
-  final DateTime giveawayDate = DateTime(2025, 7, 10, 20, 0, 0); // 10 июля 2025, 20:00
+  final DateTime giveawayDate = DateTime(2025, 7, 20, 20, 0, 0); // 20 июля 2025, 20:00 по МСК
 
   bool get _isTask1Done => _tickets >= 1; // Подписан на канал (есть 1 билет)
   bool get _isTask2Done => _tickets > 1; // Есть хотя бы 1 приглашённый друг (2+ билета)
@@ -42,7 +42,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
   }
 
   void _updateTimeLeft() {
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc().add(const Duration(hours: 3)); // МСК = UTC+3
     setState(() {
       _timeLeft = giveawayDate.difference(now);
       if (_timeLeft.isNegative) {
@@ -152,27 +152,76 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
             children: [
               // Призы
               _PrizeCard(
-                title: 'Сертификат Золотое Яблоко',
-                description: 'Сертификат на покупки в Золотом Яблоке на сумму 20,000 рублей',
+                title: 'Золотое яблоко',
+                descriptionWidget: _buildRichText([
+                  TextSpan(text: 'Будет '),
+                  TextSpan(text: 'одно', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  TextSpan(text: ' призовое место — сертификат на покупку в '),
+                  TextSpan(text: 'Золотом Яблоке', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  TextSpan(text: ' на сумму 20000 рублей'),
+                ]),
                 value: '20,000₽',
-                icon: Icons.shopping_bag,
-                color: Colors.orange,
+                icon: Icons.emoji_events,
+                color: Colors.amber,
               ),
               const SizedBox(height: 16),
               _PrizeCard(
                 title: 'Бьюти-услуги',
-                description: 'Комплекс бьюти-услуг на сумму 100,000 рублей (маникюр, педикюр, окрашивание, стрижка, макияж)',
+                descriptionWidget: _buildRichText([
+                  TextSpan(text: '4 победителя,', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  TextSpan(text: ' каждый из которых по очереди может выбрать:\n\n'),
+                  TextSpan(text: 'Татуировку до 15 см', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  TextSpan(text: ' у: '),
+                  ..._tgLinksInline(['@naidenka_tatto0', '@emi3mo', '@ufantasiesss']),
+                  TextSpan(text: '\n'),
+                  TextSpan(text: 'Татуировку до 10 см', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  TextSpan(text: ' у: '),
+                  ..._tgLinksInline(['@g9r1a', '@murderd0lll']),
+                  TextSpan(text: '\n'),
+                  TextSpan(text: 'Сертификат на пирсинг', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  TextSpan(text: ' у: '),
+                  ..._tgLinksInline(['@bloodivampin']),
+                  TextSpan(text: '\n'),
+                  TextSpan(text: 'Стрижку ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  TextSpan(text: 'или ', style: TextStyle(color: Colors.white)),
+                  TextSpan(text: 'авторский проект', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  TextSpan(text: ' у: '),
+                  ..._tgLinksInline(['@punk2_n0t_d34d']),
+                  TextSpan(text: '\n'),
+                  TextSpan(text: '50% скидку', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  TextSpan(text: ' на любой тату-проект у: '),
+                  ..._tgLinksInline(['@chchndra_tattoo']),
+                ]),
                 value: '100,000₽',
-                icon: Icons.face,
+                icon: Icons.spa,
                 color: Colors.pink,
               ),
               const SizedBox(height: 16),
               _PrizeCard(
                 title: 'Telegram Premium (3 мес)',
-                description: '3 Telegram Premium на 3 месяца',
+                descriptionWidget: _buildRichText([
+                  TextSpan(text: ''),
+                  TextSpan(text: 'Х3', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  TextSpan(text: ' подписки Telegram Premium на 3 месяца, для тех победителей которые не могут воспользоваться бьюти-услугами артистов.'),
+                ]),
                 value: '3,500₽',
                 icon: Icons.telegram,
                 color: Colors.blue,
+              ),
+              const SizedBox(height: 16),
+              _PrizeCard(
+                title: 'Скидки всем',
+                descriptionWidget: _buildRichText([
+                  TextSpan(text: ''),
+                  TextSpan(text: '7% всем участникам', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  TextSpan(text: ', получившим '),
+                  TextSpan(text: 'хотя бы 1 билет', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  TextSpan(text: ' розыгрыша на услуги всех резидентов '),
+                  TextSpan(text: 'FRESH STYLE RUSSIA', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                ]),
+                value: '7%',
+                icon: Icons.percent,
+                color: Colors.green,
               ),
               const SizedBox(height: 20),
               // Общая стоимость призов по центру снизу
@@ -184,9 +233,9 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                   border: Border.all(color: const Color(0xFFFF6EC7)),
                 ),
                 child: const Text(
-                  '🏆 Общая стоимость призов: 123,500₽',
+                  '🏆 Общая стоимость призов: > 123,500₽',
                   style: TextStyle(
-                    color: Color(0xFFFF6EC7),
+                    color: Colors.white,
                     fontFamily: 'NauryzKeds',
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -227,9 +276,14 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                       children: [
                         const Text('• ', style: TextStyle(color: Colors.white, fontSize: 16)),
                         Expanded(
-                          child: Text(
-                            '1 билет — за подписку на Telegram-папку (только если реально подписан)',
-                            style: const TextStyle(color: Colors.white, fontFamily: 'OpenSans', fontSize: 15),
+                          child: RichText(
+                            text: const TextSpan(
+                              style: TextStyle(color: Colors.white, fontFamily: 'OpenSans', fontSize: 15),
+                              children: [
+                                TextSpan(text: '+1 билет', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                                TextSpan(text: ' — за подписку на Telegram-папку (не отписываться до конца розыгрыша, условия проверяются)'),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -240,9 +294,14 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                       children: [
                         const Text('• ', style: TextStyle(color: Colors.white, fontSize: 16)),
                         Expanded(
-                          child: Text(
-                            '+1 билет — за каждого друга, который стартует бота по вашей реферальной ссылке',
-                            style: const TextStyle(color: Colors.white, fontFamily: 'OpenSans', fontSize: 15),
+                          child: RichText(
+                            text: const TextSpan(
+                              style: TextStyle(color: Colors.white, fontFamily: 'OpenSans', fontSize: 15),
+                              children: [
+                                TextSpan(text: '+1 билет', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                                TextSpan(text: ' — за каждого друга, который стартует бота по вашей реферальной ссылке'),
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -275,6 +334,8 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
     final allTasksDone = _tickets >= 1;
     final task1Done = _isTask1Done;
     final task2Done = _isTask2Done;
+
+    final bool isGoToAppButtonEnabled = allTasksDone; // Активна только если есть хотя бы 1 билет
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -422,7 +483,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                         children: [
                           _TaskTile(
                             title: 'Подписаться на Telegram-папку',
-                            subtitle: '10 каналов одним кликом\n+1000 XP',
+                            subtitle: '10 каналов одним кликом\n+1 билет',
                             icon: Icons.folder_special,
                             onTap: () async {
                               const url = 'https://t.me/addlist/f3YaeLmoNsdkYjVl';
@@ -467,7 +528,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                           ),
                           _TaskTile(
                             title: 'Пригласить друзей',
-                            subtitle: 'За каждого друга: +100 XP',
+                            subtitle: 'За каждого друга: +1 билет',
                             icon: Icons.person_add_alt_1,
                             onTap: () async {
                               // Показываем индикатор загрузки
@@ -525,7 +586,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                             ),
                           );
                         },
-                        enabled: allTasksDone, // Активна если есть хотя бы 1 билет
+                        enabled: isGoToAppButtonEnabled, // Активна если есть хотя бы 1 билет
                       ),
                     ),
                   ],
@@ -714,14 +775,16 @@ class GradientButton extends StatelessWidget {
 // _PrizeCard: value по центру снизу, иконка слева
 class _PrizeCard extends StatelessWidget {
   final String title;
-  final String description;
+  final String? description;
+  final Widget? descriptionWidget;
   final String value;
   final IconData icon;
   final Color color;
 
   const _PrizeCard({
     required this.title,
-    required this.description,
+    this.description,
+    this.descriptionWidget,
     required this.value,
     required this.icon,
     required this.color,
@@ -763,14 +826,17 @@ class _PrizeCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontFamily: 'OpenSans', // OpenSans for description
-                        fontSize: 14,
+                    if (descriptionWidget != null)
+                      descriptionWidget!
+                    else if (description != null)
+                      Text(
+                        description!,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontFamily: 'OpenSans',
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -799,4 +865,55 @@ class _PrizeCard extends StatelessWidget {
       ),
     );
   }
+}
+
+List<InlineSpan> _tgLinks(List<String> usernames) {
+  return usernames.expand((u) => [
+    const TextSpan(text: '\n'),
+    WidgetSpan(
+      alignment: PlaceholderAlignment.baseline,
+      baseline: TextBaseline.alphabetic,
+      child: GestureDetector(
+        onTap: () => launchUrl(Uri.parse('https://t.me/' + u.substring(1))),
+        child: Text(
+          u,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            decoration: TextDecoration.underline,
+          ),
+        ),
+      ),
+    ),
+  ]).toList();
+}
+
+List<InlineSpan> _tgLinksInline(List<String> usernames) {
+  return usernames.expand((u) => [
+    WidgetSpan(
+      alignment: PlaceholderAlignment.baseline,
+      baseline: TextBaseline.alphabetic,
+      child: GestureDetector(
+        onTap: () => launchUrl(Uri.parse('https://t.me/' + u.substring(1))),
+        child: Text(
+          u,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            decoration: TextDecoration.underline,
+          ),
+        ),
+      ),
+    ),
+    const TextSpan(text: ' '),
+  ]).toList();
+}
+
+Widget _buildRichText(List<InlineSpan> spans) {
+  return RichText(
+    text: TextSpan(
+      style: const TextStyle(color: Colors.white70, fontFamily: 'OpenSans', fontSize: 14),
+      children: spans,
+    ),
+  );
 }

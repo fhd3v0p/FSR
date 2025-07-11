@@ -86,7 +86,7 @@ class _MasterJoinInfoScreenState extends State<MasterJoinInfoScreen> with Ticker
           SafeArea(
             child: Column(
               children: [
-                const SizedBox(height: 12),
+                const SizedBox(height: 22),
                 // Кнопка назад теперь над фразой FOR ARTISTS
                 Align(
                   alignment: Alignment.centerLeft,
