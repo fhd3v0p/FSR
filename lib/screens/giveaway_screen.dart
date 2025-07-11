@@ -25,6 +25,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
 
   String? _username;
   int _tickets = 0;
+  int _totalTickets = 0;
 
   final DateTime giveawayDate = DateTime(2025, 7, 20, 20, 0, 0); // 20 июля 2025, 20:00 по МСК
 
@@ -69,6 +70,20 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
           _username = data['username'] ?? '';
         });
       }
+      // Получаем общее количество билетов
+      final totalResponse = await html.HttpRequest.request(
+        'https://fsr.agency/api/tickets/total',
+        method: 'GET',
+        requestHeaders: {
+          'Content-Type': 'application/json',
+        },
+      );
+      if (totalResponse.status == 200) {
+        final totalData = jsonDecode(totalResponse.responseText ?? '{}');
+        setState(() {
+          _totalTickets = totalData['total'] ?? 0;
+        });
+      }
     } catch (e) {
       print('Error fetching tickets: $e');
     }
@@ -82,7 +97,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
 
   String _formatDuration(Duration d) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    return "${d.inHours.remainder(24)}:${twoDigits(d.inMinutes.remainder(60))}:${twoDigits(d.inSeconds.remainder(60))}";
+    return "${d.inHours}:${twoDigits(d.inMinutes.remainder(60))}:${twoDigits(d.inSeconds.remainder(60))}";
   }
 
   Future<void> _logTaskCompletion(String userId, String taskName, int taskNumber) async {
@@ -429,6 +444,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                 const Spacer(), // Всё что ниже таймера — уходит вниз
                 // Опускаем все блоки максимально вниз
                 Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                                           // Кнопка "Подарки" с иконкой билета и количеством билетов
                       Padding(
@@ -463,7 +479,7 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                                 const Icon(Icons.confirmation_num, color: Color(0xFFFF6EC7), size: 22),
                                 const SizedBox(width: 4),
                                 Text(
-                                  '$_tickets',
+                                  _totalTickets > 0 ? '$_tickets/$_totalTickets' : '$_tickets',
                                   style: const TextStyle(
                                     color: Color(0xFFFF6EC7),
                                     fontFamily: 'NauryzKeds',
@@ -478,8 +494,9 @@ class _GiveawayScreenState extends State<GiveawayScreen> {
                       ),
                     // Список заданий и кнопка
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                      padding: const EdgeInsets.only(bottom: 8),
                       child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           _TaskTile(
                             title: 'Подписаться на Telegram-папку',

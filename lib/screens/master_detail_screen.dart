@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../models/master_model.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:convert';
+import 'dart:html' as html;
+import '../services/telegram_webapp_service.dart';
 
 class MasterDetailScreen extends StatefulWidget {
   final MasterModel master;
@@ -12,6 +15,67 @@ class MasterDetailScreen extends StatefulWidget {
 
 class _MasterDetailScreenState extends State<MasterDetailScreen> {
   int? _galleryIndex;
+  double? _averageRating;
+  int? _votes;
+  int? _userRating;
+  bool _isLoadingRating = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRating();
+  }
+
+  Future<void> _fetchRating() async {
+    setState(() { _isLoadingRating = true; });
+    try {
+      final userId = TelegramWebAppService.getUserId() ?? '';
+      final masterId = widget.master.name;
+      final response = await html.HttpRequest.request(
+        '/api/rating?master_id=$masterId&user_id=$userId',
+        method: 'GET',
+      );
+      if (response.status == 200) {
+        final data = jsonDecode(response.responseText ?? '{}');
+        setState(() {
+          _averageRating = (data['average'] as num?)?.toDouble();
+          _votes = data['votes'] as int?;
+          _userRating = data['user_rating'] as int?;
+        });
+      }
+    } catch (e) {
+      // ignore errors, show nothing
+    } finally {
+      setState(() { _isLoadingRating = false; });
+    }
+  }
+
+  Future<void> _setRating(int rating) async {
+    final userId = TelegramWebAppService.getUserId() ?? '';
+    final masterId = widget.master.name;
+    try {
+      final response = await html.HttpRequest.request(
+        '/api/rate',
+        method: 'POST',
+        sendData: jsonEncode({
+          'master_id': masterId,
+          'user_id': userId,
+          'rating': rating,
+        }),
+        requestHeaders: {'Content-Type': 'application/json'},
+      );
+      if (response.status == 200) {
+        final data = jsonDecode(response.responseText ?? '{}');
+        setState(() {
+          _userRating = rating;
+          _averageRating = (data['average'] as num?)?.toDouble();
+          _votes = data['votes'] as int?;
+        });
+      }
+    } catch (e) {
+      // ignore errors
+    }
+  }
 
   void _openGallery(int index) {
     setState(() {
@@ -48,11 +112,12 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white, width: 2),
+        color: Color(0xFFF3E0E6), // фон как на MasterCloudScreen
       ),
       child: CircleAvatar(
         backgroundImage: AssetImage(avatarPath),
         radius: radius,
-        backgroundColor: Colors.black.withOpacity(0.5),
+        backgroundColor: Colors.transparent,
       ),
     );
   }
@@ -114,16 +179,64 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                               buildAvatar(master.avatar, 38),
                               const SizedBox(width: 18),
                               Expanded(
-                                child: Text(
-                                  master.name,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'NauryzKeds',
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      master.name,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 26,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'NauryzKeds',
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    _isLoadingRating
+                                        ? const SizedBox(height: 32)
+                                        : Row(
+                                            children: [
+                                              for (int i = 1; i <= 5; i++)
+                                                GestureDetector(
+                                                  onTap: () => _setRating(i),
+                                                  child: Icon(
+                                                    Icons.star,
+                                                    color: i <= (_userRating ?? 0)
+                                                        ? Color(0xFFFF6EC7)
+                                                        : Colors.white24,
+                                                    size: 28,
+                                                  ),
+                                                ),
+                                              if (_averageRating != null)
+                                                Padding(
+                                                  padding: const EdgeInsets.only(left: 10),
+                                                  child: Text(
+                                                    _averageRating!.toStringAsFixed(1),
+                                                    style: const TextStyle(
+                                                      color: Color(0xFFFF6EC7),
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 18,
+                                                      fontFamily: 'OpenSans',
+                                                    ),
+                                                  ),
+                                                ),
+                                              if (_votes != null)
+                                                Padding(
+                                                  padding: const EdgeInsets.only(left: 4),
+                                                  child: Text(
+                                                    '(${_votes})',
+                                                    style: const TextStyle(
+                                                      color: Colors.white54,
+                                                      fontSize: 14,
+                                                      fontFamily: 'OpenSans',
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -166,7 +279,9 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                           width: double.infinity,
                           child: GestureDetector(
                             onTap: () async {
-                              const url = 'https://t.me/FSR_Adminka';
+                              final url = master.bookingUrl != null && master.bookingUrl!.isNotEmpty
+                                  ? master.bookingUrl!
+                                  : 'https://t.me/FSR_Adminka';
                               await launchUrl(Uri.parse(url));
                             },
                             child: Container(
@@ -271,7 +386,7 @@ class _MasterDetailScreenState extends State<MasterDetailScreen> {
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
-                                  fontFamily: 'NauryzKeds',
+                                  fontFamily: 'OpenSans',
                                 ),
                               ),
                             ],
